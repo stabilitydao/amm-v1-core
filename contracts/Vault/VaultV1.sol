@@ -661,7 +661,7 @@ contract BoringBatchable is BaseBoringBatchable {
 /// Yield from this will go to the token depositors.
 /// Rebasing tokens ARE NOT supported and WILL cause loss of funds.
 /// Any funds transfered directly onto the StabilityVault will be lost, use the deposit function instead.
-contract StabilityVaultV1 is MasterContractManager, BoringBatchable {
+contract VaultV1 is MasterContractManager, BoringBatchable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;
