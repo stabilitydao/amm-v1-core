@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// Financier Medium Risk
+// Banker Medium Risk
 
 //  __  __             __    __      _____                  __ __
 // |  |/  .---.-.-----|  |--|__|    |     |_.-----.-----.--|  |__.-----.-----.
@@ -755,14 +755,14 @@ interface ISwapper {
     ) external returns (uint256 shareUsed, uint256 shareReturned);
 }
 
-// File contracts/FinancierPair.sol
+// File contracts/BankerPair.sol
 // License-Identifier: UNLICENSED
-// Financier Medium Risk
+// Banker Medium Risk
 
-/// @title FinancierPair
+/// @title BankerPair
 /// @dev This contract allows contract calls to any contract (except BentoBox)
 /// from arbitrary callers thus, don't trust calls from this contract in any circumstances.
-contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
+contract BankerPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using RebaseLibrary for Rebase;
@@ -781,7 +781,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
     // Immutables (for MasterContract and all clones)
     IBentoBoxV1 public immutable bentoBox;
-    FinancierPairMediumRiskV1 public immutable masterContract;
+    BankerPairMediumRiskV1 public immutable masterContract;
 
     // MasterContract variables
     address public feeTo;
@@ -796,7 +796,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
     // Total amounts
     uint256 public totalCollateralShare; // Total collateral supplied
-    Rebase public totalAsset; // elastic = BentoBox shares held by the FinancierPair, base = Total fractions held by asset suppliers
+    Rebase public totalAsset; // elastic = BentoBox shares held by the BankerPair, base = Total fractions held by asset suppliers
     Rebase public totalBorrow; // elastic = Total token amount to be repayed by borrowers, base = Total parts of the debt held by borrowers
 
     // User balances
@@ -822,7 +822,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     }
 
     function name() external view returns (string memory) {
-        return string(abi.encodePacked("Financier Medium Risk ", collateral.safeName(), "/", asset.safeName(), "-", oracle.name(oracleData)));
+        return string(abi.encodePacked("Banker Medium Risk ", collateral.safeName(), "/", asset.safeName(), "-", oracle.name(oracleData)));
     }
 
     function decimals() external view returns (uint8) {
@@ -834,7 +834,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         return totalAsset.base;
     }
 
-    // Settings for the Medium Risk FinancierPair
+    // Settings for the Medium Risk BankerPair
     uint256 private constant CLOSED_COLLATERIZATION_RATE = 75000; // 75%
     uint256 private constant OPEN_COLLATERIZATION_RATE = 77000; // 77%
     uint256 private constant COLLATERIZATION_RATE_PRECISION = 1e5; // Must be less than EXCHANGE_RATE_PRECISION (due to optimization in math)
@@ -871,9 +871,9 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     /// @notice Serves as the constructor for clones, as clones can't have a regular constructor
     /// @dev `data` is abi encoded in the format: (IERC20 collateral, IERC20 asset, IOracle oracle, bytes oracleData)
     function init(bytes calldata data) public payable override {
-        require(address(collateral) == address(0), "FinancierPair: already initialized");
+        require(address(collateral) == address(0), "BankerPair: already initialized");
         (collateral, asset, oracle, oracleData) = abi.decode(data, (IERC20, IERC20, IOracle, bytes));
-        require(address(collateral) != address(0), "FinancierPair: bad pair");
+        require(address(collateral) != address(0), "BankerPair: bad pair");
 
         accrueInfo.interestPerSecond = uint64(STARTING_INTEREST_PER_SECOND); // 1% APR, with 1e18 being 100%
     }
@@ -968,7 +968,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     /// @dev Checks if the user is solvent in the closed liquidation case at the end of the function body.
     modifier solvent() {
         _;
-        require(_isSolvent(msg.sender, false, exchangeRate), "FinancierPair: user insolvent");
+        require(_isSolvent(msg.sender, false, exchangeRate), "BankerPair: user insolvent");
     }
 
     /// @notice Gets the exchange rate. I.e how much collateral to buy 1e18 asset.
@@ -1001,7 +1001,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         bool skim
     ) internal {
         if (skim) {
-            require(share <= bentoBox.balanceOf(token, address(this)).sub(total), "FinancierPair: Skim too much");
+            require(share <= bentoBox.balanceOf(token, address(this)).sub(total), "BankerPair: Skim too much");
         } else {
             bentoBox.transfer(token, msg.sender, address(this), share);
         }
@@ -1083,7 +1083,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         balanceOf[msg.sender] = balanceOf[msg.sender].sub(fraction);
         _totalAsset.elastic = _totalAsset.elastic.sub(share.to128());
         _totalAsset.base = _totalAsset.base.sub(fraction.to128());
-        require(_totalAsset.base >= 1000, "Financier: below minimum");
+        require(_totalAsset.base >= 1000, "Banker: below minimum");
         totalAsset = _totalAsset;
         emit LogRemoveAsset(msg.sender, to, share, fraction);
         bentoBox.transfer(asset, address(this), to, share);
@@ -1108,7 +1108,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
         share = bentoBox.toShare(asset, amount, false);
         Rebase memory _totalAsset = totalAsset;
-        require(_totalAsset.base >= 1000, "Financier: below minimum");
+        require(_totalAsset.base >= 1000, "Banker: below minimum");
         _totalAsset.elastic = _totalAsset.elastic.sub(share.to128());
         totalAsset = _totalAsset;
         bentoBox.transfer(asset, address(this), to, share);
@@ -1232,10 +1232,10 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
             callData = abi.encodePacked(callData, value1, value2);
         }
 
-        require(callee != address(bentoBox) && callee != address(this), "FinancierPair: can't call");
+        require(callee != address(bentoBox) && callee != address(this), "BankerPair: can't call");
 
         (bool success, bytes memory returnData) = callee.call{value: value}(callData);
-        require(success, "FinancierPair: call failed");
+        require(success, "BankerPair: call failed");
         return (returnData, returnValues);
     }
 
@@ -1286,7 +1286,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
             } else if (action == ACTION_UPDATE_EXCHANGE_RATE) {
                 (bool must_update, uint256 minRate, uint256 maxRate) = abi.decode(datas[i], (bool, uint256, uint256));
                 (bool updated, uint256 rate) = updateExchangeRate();
-                require((!must_update || updated) && rate > minRate && (maxRate == 0 || rate > maxRate), "FinancierPair: rate not ok");
+                require((!must_update || updated) && rate > minRate && (maxRate == 0 || rate > maxRate), "BankerPair: rate not ok");
             } else if (action == ACTION_BENTO_SETAPPROVAL) {
                 (address user, address _masterContract, bool approved, uint8 v, bytes32 r, bytes32 s) =
                     abi.decode(datas[i], (address, address, bool, uint8, bytes32, bytes32));
@@ -1319,7 +1319,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         }
 
         if (status.needsSolvencyCheck) {
-            require(_isSolvent(msg.sender, false, exchangeRate), "FinancierPair: user insolvent");
+            require(_isSolvent(msg.sender, false, exchangeRate), "BankerPair: user insolvent");
         }
     }
 
@@ -1372,7 +1372,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
                 allBorrowPart = allBorrowPart.add(borrowPart);
             }
         }
-        require(allBorrowAmount != 0, "FinancierPair: all are solvent");
+        require(allBorrowAmount != 0, "BankerPair: all are solvent");
         _totalBorrow.elastic = _totalBorrow.elastic.sub(allBorrowAmount.to128());
         _totalBorrow.base = _totalBorrow.base.sub(allBorrowPart.to128());
         totalBorrow = _totalBorrow;
@@ -1382,7 +1382,7 @@ contract FinancierPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
         if (!open) {
             // Closed liquidation using a pre-approved swapper for the benefit of the LPs
-            require(masterContract.swappers(swapper), "FinancierPair: Invalid swapper");
+            require(masterContract.swappers(swapper), "BankerPair: Invalid swapper");
 
             // Swaps the users' collateral for the borrowed asset
             bentoBox.transfer(collateral, address(this), address(swapper), allCollateralShare);
