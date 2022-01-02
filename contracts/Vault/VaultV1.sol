@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// The StabilityVault
+// The Vault
 
 //  ▄▄▄▄· ▄▄▄ . ▐ ▄ ▄▄▄▄▄      ▄▄▄▄·       ▐▄• ▄
 //  ▐█ ▀█▪▀▄.▀·█▌▐█•██  ▪     ▐█ ▀█▪▪      █▌█▌▪
@@ -500,7 +500,7 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
     }
 
     function _calculateDomainSeparator(uint256 chainId) private view returns (bytes32) {
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_SIGNATURE_HASH, keccak256("StabilityVault V1"), chainId, address(this)));
+        return keccak256(abi.encode(DOMAIN_SEPARATOR_SIGNATURE_HASH, keccak256("Vault V1"), chainId, address(this)));
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -512,7 +512,7 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
         return chainId == DOMAIN_SEPARATOR_CHAIN_ID ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId);
     }
 
-    /// @notice Other contracts need to register with this master contract so that users can approve them for the StabilityVault.
+    /// @notice Other contracts need to register with this master contract so that users can approve them for the Vault.
     function registerProtocol() public {
         masterContractOf[msg.sender] = msg.sender;
         emit LogRegisterProtocol(msg.sender);
@@ -575,8 +575,8 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
                             abi.encode(
                                 APPROVAL_SIGNATURE_HASH,
                                 approved
-                                    ? keccak256("Give FULL access to funds in (and approved to) StabilityVault?")
-                                    : keccak256("Revoke access to StabilityVault?"),
+                                    ? keccak256("Give FULL access to funds in (and approved to) Vault?")
+                                    : keccak256("Revoke access to Vault?"),
                                 user,
                                 masterContract,
                                 approved,
@@ -652,15 +652,15 @@ contract BoringBatchable is BaseBoringBatchable {
     }
 }
 
-// File contracts/StabilityVault.sol
+// File contracts/VaultV1.sol
 // License-Identifier: UNLICENSED
 
-/// @title StabilityVault
+/// @title Vault
 /// @author BoringCrypto, Keno
-/// @notice The StabilityVault is a vault for tokens. The stored tokens can be flash loaned and used in strategies.
+/// @notice This is a vault for tokens. The stored tokens can be flash loaned and used in strategies.
 /// Yield from this will go to the token depositors.
 /// Rebasing tokens ARE NOT supported and WILL cause loss of funds.
-/// Any funds transfered directly onto the StabilityVault will be lost, use the deposit function instead.
+/// Any funds transfered directly onto the Vault will be lost, use the deposit function instead.
 contract VaultV1 is MasterContractManager, BoringBatchable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
@@ -692,7 +692,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
     struct StrategyData {
         uint64 strategyStartDate;
         uint64 targetPercentage;
-        uint128 balance; // the balance of the strategy that StabilityVault thinks is in there
+        uint128 balance; // the balance of the strategy that Vault thinks is in there
     }
 
     // ******************************** //
@@ -738,7 +738,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
     /// Modifier to check if the msg.sender is allowed to use funds belonging to the 'from' address.
     /// If 'from' is msg.sender, it's allowed.
-    /// If 'from' is the StabilityVault itself, it's allowed. Any ETH, token balances (above the known balances) or StabilityVault balances
+    /// If 'from' is the Vault itself, it's allowed. Any ETH, token balances (above the known balances) or Vault balances
     /// can be taken by anyone.
     /// This is to enable skimming, not just for deposits, but also for withdrawals or transfers, enabling better composability.
     /// If 'from' is a clone of a masterContract AND the 'from' address has approved that masterContract, it's allowed.
@@ -746,8 +746,8 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         if (from != msg.sender && from != address(this)) {
             // From is sender or you are skimming
             address masterContract = masterContractOf[msg.sender];
-            require(masterContract != address(0), "StabilityVault: no masterContract");
-            require(masterContractApproved[masterContract][from], "StabilityVault: Transfer not approved");
+            require(masterContract != address(0), "Vault: no masterContract");
+            require(masterContractApproved[masterContract][from], "Vault: Transfer not approved");
         }
         _;
     }
@@ -808,14 +808,14 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         uint256 share
     ) public payable allowed(from) returns (uint256 amountOut, uint256 shareOut) {
         // Checks
-        require(to != address(0), "StabilityVault: to not set"); // To avoid a bad UI from burning funds
+        require(to != address(0), "Vault: to not set"); // To avoid a bad UI from burning funds
 
         // Effects
         IERC20 token = token_ == USE_ETHEREUM ? wethToken : token_;
         Rebase memory total = totals[token];
 
         // If a new token gets added, the tokenSupply call checks that this is a deployed contract. Needed for security.
-        require(total.elastic != 0 || token.totalSupply() > 0, "StabilityVault: No tokens");
+        require(total.elastic != 0 || token.totalSupply() > 0, "Vault: No tokens");
         if (share == 0) {
             // value of the share may be lower than the amount due to rounding, that's ok
             share = total.toBase(amount, false);
@@ -833,7 +833,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         // During flashloans the _tokenBalanceOf is lower than 'reality', so skimming deposits will mostly fail during a flashloan.
         require(
             from != address(this) || token_ == USE_ETHEREUM || amount <= _tokenBalanceOf(token).sub(total.elastic),
-            "StabilityVault: Skim too much"
+            "Vault: Skim too much"
         );
 
         balanceOf[token][to] = balanceOf[token][to].add(share);
@@ -871,7 +871,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         uint256 share
     ) public allowed(from) returns (uint256 amountOut, uint256 shareOut) {
         // Checks
-        require(to != address(0), "StabilityVault: to not set"); // To avoid a bad UI from burning funds
+        require(to != address(0), "Vault: to not set"); // To avoid a bad UI from burning funds
 
         // Effects
         IERC20 token = token_ == USE_ETHEREUM ? wethToken : token_;
@@ -888,7 +888,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         total.elastic = total.elastic.sub(amount.to128());
         total.base = total.base.sub(share.to128());
         // There have to be at least 1000 shares left to prevent reseting the share/amount ratio (unless it's fully emptied)
-        require(total.base >= MINIMUM_SHARE_BALANCE || total.base == 0, "StabilityVault: cannot empty");
+        require(total.base >= MINIMUM_SHARE_BALANCE || total.base == 0, "Vault: cannot empty");
         totals[token] = total;
 
         // Interactions
@@ -897,7 +897,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
             IWETH(address(wethToken)).withdraw(amount);
             // X2, X3: A revert or big gas usage could block, however, the to address is under control of the caller.
             (bool success, ) = to.call{value: amount}("");
-            require(success, "StabilityVault: ETH transfer failed");
+            require(success, "Vault: ETH transfer failed");
         } else {
             // X2, X3: A malicious token could block withdrawal of just THAT token.
             //         masterContracts may want to take care not to rely on withdraw always succeeding.
@@ -923,7 +923,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         uint256 share
     ) public allowed(from) {
         // Checks
-        require(to != address(0), "StabilityVault: to not set"); // To avoid a bad UI from burning funds
+        require(to != address(0), "Vault: to not set"); // To avoid a bad UI from burning funds
 
         // Effects
         balanceOf[token][from] = balanceOf[token][from].sub(share);
@@ -946,7 +946,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         uint256[] calldata shares
     ) public allowed(from) {
         // Checks
-        require(tos[0] != address(0), "StabilityVault: to[0] not set"); // To avoid a bad UI from burning funds
+        require(tos[0] != address(0), "Vault: to[0] not set"); // To avoid a bad UI from burning funds
 
         // Effects
         uint256 totalAmount;
@@ -982,7 +982,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
         borrower.onFlashLoan(msg.sender, token, amount, fee, data);
 
-        require(_tokenBalanceOf(token) >= totals[token].addElastic(fee.to128()), "StabilityVault: Wrong amount");
+        require(_tokenBalanceOf(token) >= totals[token].addElastic(fee.to128()), "Vault: Wrong amount");
         emit LogFlashLoan(address(borrower), token, amount, fee, receiver);
     }
 
@@ -1017,7 +1017,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
         for (uint256 i = 0; i < len; i++) {
             IERC20 token = tokens[i];
-            require(_tokenBalanceOf(token) >= totals[token].addElastic(fees[i].to128()), "StabilityVault: Wrong amount");
+            require(_tokenBalanceOf(token) >= totals[token].addElastic(fees[i].to128()), "Vault: Wrong amount");
             emit LogFlashLoan(address(borrower), token, amounts[i], fees[i], receivers[i]);
         }
     }
@@ -1088,7 +1088,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
     /// @param maxChangeAmount The maximum amount for either pulling or pushing from/to the `IStrategy` contract.
     // F5 - Checks-Effects-Interactions pattern followed? (SWC-107)
     // F5: Total amount is updated AFTER interaction. But strategy is under our control.
-    // F5: Not followed to prevent reentrancy issues with flashloans and StabilityVault skims?
+    // F5: Not followed to prevent reentrancy issues with flashloans and Vault skims?
     function harvest(
         IERC20 token,
         bool balance,
@@ -1111,7 +1111,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         } else if (balanceChange < 0) {
             // C1 - All math done through BoringMath (SWC-101)
             // C1: balanceChange could overflow if it's max negative int128.
-            // But tokens with balances that large are not supported by the StabilityVault.
+            // But tokens with balances that large are not supported by the Vault.
             uint256 sub = uint256(-balanceChange);
             totalElastic = totalElastic.sub(sub);
             totals[token].elastic = totalElastic.to128();
