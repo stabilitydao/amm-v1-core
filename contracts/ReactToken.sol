@@ -8,8 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // WARNING: There is a known vuln contained within this contract related to vote delegation, 
 // it's NOT recommmended to use this in production.  
 
-// SushiToken with Governance.
-contract SushiToken is ERC20("SushiToken", "SUSHI"), Ownable {
+// ReactToken with Governance.
+contract ReactToken is ERC20("ReactToken", "REACT"), Ownable {
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
