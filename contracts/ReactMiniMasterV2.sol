@@ -10,7 +10,7 @@ import "./libraries/SignedSafeMath.sol";
 import "./interfaces/IRewarder.sol";
 import "./interfaces/IReactMaster.sol";
 
-interface IMigratorChef {
+interface IMigrator {
     // Take the current LP token address and return the new LP token address.
     // Migrator should have full access to the caller's LP token.
     function migrate(IERC20 token) external returns (IERC20);
@@ -47,7 +47,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
     /// @notice Address of REACT contract.
     IERC20 public immutable REACT;
     // @notice The migrator contract. It has a lot of power. Can only be set through governance (owner).
-    IMigratorChef public migrator;
+    IMigrator public migrator;
 
     /// @notice Info of each MCV2 pool.
     PoolInfo[] public poolInfo;
@@ -122,7 +122,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
 
     /// @notice Set the `migrator` contract. Can only be called by the owner.
     /// @param _migrator The contract address to set.
-    function setMigrator(IMigratorChef _migrator) public onlyOwner {
+    function setMigrator(IMigrator _migrator) public onlyOwner {
         migrator = _migrator;
     }
 
