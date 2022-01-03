@@ -7,7 +7,7 @@ import "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 
-interface IMasterChefV2 {
+interface IReactMasterV2 {
     function lpToken(uint256 pid) external view returns (IERC20 _lpToken); 
 }
 
@@ -64,8 +64,8 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
         emit LogInit(rewardToken, owner, rewardPerSecond, masterLpToken);
     }
 
-    function onSushiReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyMCV2 override external {
-        require(IMasterChefV2(MASTERCHEF_V2).lpToken(pid) == masterLpToken);
+    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyMCV2 override external {
+        require(IReactMasterV2(MASTERCHEF_V2).lpToken(pid) == masterLpToken);
 
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][_user];
@@ -96,8 +96,8 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
         return (_rewardRates);
     }
 
-    /// @notice Sets the sushi per second to be distributed. Can only be called by the owner.
-    /// @param _rewardPerSecond The amount of Sushi to be distributed per second.
+    /// @notice Sets the react per second to be distributed. Can only be called by the owner.
+    /// @param _rewardPerSecond The amount of React to be distributed per second.
     function setRewardPerSecond(uint256 _rewardPerSecond) public onlyOwner {
         rewardPerSecond = _rewardPerSecond;
         emit LogRewardPerSecond(_rewardPerSecond);
@@ -114,16 +114,16 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     /// @notice View function to see pending Token
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
-    /// @return pending SUSHI reward for a given user.
+    /// @return pending REACT reward for a given user.
     function pendingToken(uint256 _pid, address _user) public view returns (uint256 pending) {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accToken1PerShare = pool.accToken1PerShare;
-        uint256 lpSupply = IMasterChefV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
+        uint256 lpSupply = IReactMasterV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
         if (block.timestamp > pool.lastRewardTime && lpSupply != 0) {
             uint256 time = block.timestamp.sub(pool.lastRewardTime);
-            uint256 sushiReward = time.mul(rewardPerSecond);
-            accToken1PerShare = accToken1PerShare.add(sushiReward.mul(ACC_TOKEN_PRECISION) / lpSupply);
+            uint256 reactReward = time.mul(rewardPerSecond);
+            accToken1PerShare = accToken1PerShare.add(reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply);
         }
         pending = (user.amount.mul(accToken1PerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
     }
@@ -134,12 +134,12 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
         pool = poolInfo[pid];
         if (block.timestamp > pool.lastRewardTime) {
-            uint256 lpSupply = IMasterChefV2(MASTERCHEF_V2).lpToken(pid).balanceOf(MASTERCHEF_V2);
+            uint256 lpSupply = IReactMasterV2(MASTERCHEF_V2).lpToken(pid).balanceOf(MASTERCHEF_V2);
 
             if (lpSupply > 0) {
                 uint256 time = block.timestamp.sub(pool.lastRewardTime);
-                uint256 sushiReward = time.mul(rewardPerSecond);
-                pool.accToken1PerShare = pool.accToken1PerShare.add((sushiReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128());
+                uint256 reactReward = time.mul(rewardPerSecond);
+                pool.accToken1PerShare = pool.accToken1PerShare.add((reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128());
             }
             pool.lastRewardTime = block.timestamp.to64();
             poolInfo[pid] = pool;

@@ -7,7 +7,7 @@ import "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 
-interface IMasterChefV2 {
+interface IReactMasterV2 {
     function lpToken(uint256 pid) external view returns (IERC20 _lpToken); 
 }
 
@@ -69,8 +69,8 @@ contract CloneRewarderTimeDual is IRewarder,  BoringOwnable{
         emit LogInit(rewardToken1, rewardToken2, owner, rewardPerSecond1, rewardPerSecond2, masterLpToken);
     }
 
-    function onSushiReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyMCV2 override external {
-        require(IMasterChefV2(MASTERCHEF_V2).lpToken(pid) == masterLpToken);
+    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyMCV2 override external {
+        require(IReactMasterV2(MASTERCHEF_V2).lpToken(pid) == masterLpToken);
 
         PoolInfo memory pool = updatePool(pid);
         UserInfo memory _userInfo = userInfo[pid][_user];
@@ -115,7 +115,7 @@ contract CloneRewarderTimeDual is IRewarder,  BoringOwnable{
         return (_rewardRates);
     }
 
-    /// @notice Sets the sushi per second to be distributed. Can only be called by the owner.
+    /// @notice Sets the react per second to be distributed. Can only be called by the owner.
     /// @param _rewardPerSecond1 The amount of reward token 1 to be distributed per second.
     /// @param _rewardPerSecond2 The amount of reward token 2 to be distributed per second.
     function setRewardPerSecond(uint128 _rewardPerSecond1, uint128 _rewardPerSecond2) public onlyOwner {
@@ -140,7 +140,7 @@ contract CloneRewarderTimeDual is IRewarder,  BoringOwnable{
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accToken1PerShare = pool.accToken1PerShare;
         uint256 accToken2PerShare = pool.accToken2PerShare;
-        uint256 lpSupply = IMasterChefV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
+        uint256 lpSupply = IReactMasterV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
         if (block.timestamp > pool.lastRewardTime && lpSupply != 0) {
             uint256 time = block.timestamp.sub(pool.lastRewardTime);
             uint256 pending1 = time.mul(rewardPerSecond1);
@@ -158,7 +158,7 @@ contract CloneRewarderTimeDual is IRewarder,  BoringOwnable{
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
         pool = poolInfo[pid];
         if (block.timestamp > pool.lastRewardTime) {
-            uint256 lpSupply = IMasterChefV2(MASTERCHEF_V2).lpToken(pid).balanceOf(MASTERCHEF_V2);
+            uint256 lpSupply = IReactMasterV2(MASTERCHEF_V2).lpToken(pid).balanceOf(MASTERCHEF_V2);
 
             if (lpSupply > 0) {
                 uint256 time = block.timestamp.sub(pool.lastRewardTime);

@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 // ReactToken with Governance.
 contract ReactToken is ERC20("ReactToken", "REACT"), Ownable {
-    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
+    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (ReactMaster).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
@@ -118,9 +118,9 @@ contract ReactToken is ERC20("ReactToken", "REACT"), Ownable {
         );
 
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "SUSHI::delegateBySig: invalid signature");
-        require(nonce == nonces[signatory]++, "SUSHI::delegateBySig: invalid nonce");
-        require(now <= expiry, "SUSHI::delegateBySig: signature expired");
+        require(signatory != address(0), "REACT::delegateBySig: invalid signature");
+        require(nonce == nonces[signatory]++, "REACT::delegateBySig: invalid nonce");
+        require(now <= expiry, "REACT::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -150,7 +150,7 @@ contract ReactToken is ERC20("ReactToken", "REACT"), Ownable {
         view
         returns (uint256)
     {
-        require(blockNumber < block.number, "SUSHI::getPriorVotes: not yet determined");
+        require(blockNumber < block.number, "REACT::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
         if (nCheckpoints == 0) {
@@ -187,7 +187,7 @@ contract ReactToken is ERC20("ReactToken", "REACT"), Ownable {
         internal
     {
         address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying SUSHIs (not scaled);
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying REACTs (not scaled);
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -223,7 +223,7 @@ contract ReactToken is ERC20("ReactToken", "REACT"), Ownable {
     )
         internal
     {
-        uint32 blockNumber = safe32(block.number, "SUSHI::_writeCheckpoint: block number exceeds 32 bits");
+        uint32 blockNumber = safe32(block.number, "REACT::_writeCheckpoint: block number exceeds 32 bits");
 
         if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
             checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
