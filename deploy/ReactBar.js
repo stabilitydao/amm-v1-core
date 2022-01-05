@@ -3,15 +3,15 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
   const { deployer } = await getNamedAccounts()
 
-  const sushi = await deployments.get("SushiToken")
+  const react = await deployments.get("ReactToken")
 
-  await deploy("SushiBar", {
+  await deploy("ReactBar", {
     from: deployer,
-    args: [sushi.address],
+    args: [react.address],
     log: true,
     deterministicDeployment: false
   })
 }
 
-module.exports.tags = ["SushiBar"]
-module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "SushiToken"]
+module.exports.tags = ["ReactBar"]
+module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "ReactToken"]

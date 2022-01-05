@@ -191,73 +191,73 @@ task("router:add-liquidity-eth", "Router add liquidity eth")
   await (await router.connect(await getNamedSigner("dev")).addLiquidityETH(token, tokenDesired, tokenMinimum, ethMinimum, to, deadline)).wait()    
 });
 
-task("migrate", "Migrates liquidity from Uniswap to SushiSwap")
+task("migrate", "Migrates liquidity from Uniswap to ReactSwap")
   .addOptionalParam("a", "Token A", "0xaD6D458402F60fD3Bd25163575031ACDce07538D")
   .addOptionalParam("b", "Token B", "0xc778417E063141139Fce010982780140Aa0cD5Ab")
   .setAction(require("./migrate"))
 
-task("masterchef:add", "Add pool to masterchef")
+task("reactmaster:add", "Add pool to reactmaster")
 .setAction(async function (taskArguments, { ethers: { getNamedSigner } }, runSuper) {
-  const masterChef = await ethers.getContract("MasterChef")
+  const reactMaster = await ethers.getContract("ReactMaster")
 
-  await (await masterChef.connect(await getNamedSigner("dev")).add(1000, '0x3e78a806b127c02b54419191571d9379819e989c', true)).wait()
+  await (await reactMaster.connect(await getNamedSigner("dev")).add(1000, '0x3e78a806b127c02b54419191571d9379819e989c', true)).wait()
 });
 
-task("masterchef:deposit", "MasterChef deposit")
+task("reactmaster:deposit", "ReactMaster deposit")
 .addParam("pid", "Pool ID")
 .addParam("amount", "Amount")
 .setAction(async function ({ pid, amount }, { ethers: { getNamedSigner } }, runSuper) {
-  const masterChef = await ethers.getContract("MasterChef")
+  const reactMaster = await ethers.getContract("ReactMaster")
 
-  const { lpToken } = await masterChef.poolInfo(pid)
+  const { lpToken } = await reactMaster.poolInfo(pid)
 
-  await run("erc20:approve", { token: lpToken, spender: masterChef.address })
+  await run("erc20:approve", { token: lpToken, spender: reactMaster.address })
 
-  await (await masterChef.connect(await getNamedSigner("dev")).deposit(pid, amount)).wait()
+  await (await reactMaster.connect(await getNamedSigner("dev")).deposit(pid, amount)).wait()
 });
 
-task("masterchef:withdraw", "MasterChef withdraw")
+task("reactmaster:withdraw", "ReactMaster withdraw")
 .addParam("pid", "Pool ID")
 .addParam("amount", "Amount")
 .setAction(async function ({ pid, amount }, { ethers: { getNamedSigner } }, runSuper) {
-  const masterChef = await ethers.getContract("MasterChef")
+  const reactMaster = await ethers.getContract("ReactMaster")
 
-  const { lpToken } = await masterChef.poolInfo(pid)
+  const { lpToken } = await reactMaster.poolInfo(pid)
 
-  await run("erc20:approve", { token: lpToken, spender: masterChef.address })
+  await run("erc20:approve", { token: lpToken, spender: reactMaster.address })
 
-  await (await masterChef.connect(await getNamedSigner("dev")).withdraw(pid, amount)).wait()
+  await (await reactMaster.connect(await getNamedSigner("dev")).withdraw(pid, amount)).wait()
 });
 
-task("bar:enter", "SushiBar enter")
+task("bar:enter", "ReactBar enter")
 .addParam("amount", "Amount")
 .setAction(async function ({ amount }, { ethers: { getNamedSigner } }, runSuper) {
-  const sushi = await ethers.getContract("SushiToken")
+  const react = await ethers.getContract("ReactToken")
 
-  const bar = await ethers.getContract("SushiBar")
+  const bar = await ethers.getContract("ReactBar")
 
-  await run("erc20:approve", { token: sushi.address, spender: bar.address })
+  await run("erc20:approve", { token: react.address, spender: bar.address })
   
   await (await bar.connect(await getNamedSigner("dev")).enter(amount)).wait()
 });
 
-task("bar:leave", "SushiBar leave")
+task("bar:leave", "ReactBar leave")
 .addParam("amount", "Amount")
 .setAction(async function ({ amount }, { ethers: { getNamedSigner } }, runSuper) {
-  const sushi = await ethers.getContract("SushiToken")
+  const react = await ethers.getContract("ReactToken")
 
-  const bar = await ethers.getContract("SushiBar")
+  const bar = await ethers.getContract("ReactBar")
 
-  await run("erc20:approve", { token: sushi.address, spender: bar.address })
+  await run("erc20:approve", { token: react.address, spender: bar.address })
   
   await (await bar.connect(await getNamedSigner("dev")).leave(amount)).wait()
 });
 
-task("maker:serve", "SushiBar serve")
+task("maker:serve", "ReactBar serve")
 .addParam("a", "Token A")
 .addParam("b", "Token B")
 .setAction(async function ({ a, b }, { ethers: { getNamedSigner } }, runSuper) {
-  const maker = await ethers.getContract("SushiMaker")
+  const maker = await ethers.getContract("ReactMaker")
 
   await (await maker.connect(await getNamedSigner("dev")).convert(a, b, { gasLimitgasLimit: 5198000 })).wait()
 });
