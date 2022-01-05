@@ -9,7 +9,7 @@ import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
 
 import "./Ownable.sol";
 
-interface IBentoBoxWithdraw {
+interface IVaultWithdraw {
     function withdraw(
         IERC20 token_,
         address from,
@@ -36,7 +36,7 @@ contract ReactMakerKashi is Ownable {
     //0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
     address private immutable bar;
     //0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272
-    IBentoBoxWithdraw private immutable bentoBox;
+    IVaultWithdraw private immutable vault;
     //0xF5BCE5077908a1b7370B9ae04AdC565EBd643966 
     address private immutable react;
     //0x6B3595068778DD592e39A122f4f5a5cF09C90fE2
@@ -59,14 +59,14 @@ contract ReactMakerKashi is Ownable {
     constructor(
         IUniswapV2Factory _factory,
         address _bar,
-        IBentoBoxWithdraw _bentoBox,
+        IVaultWithdraw _vault,
         address _react,
         address _weth,
         bytes32 _pairCodeHash
     ) public {
         factory = _factory;
         bar = _bar;
-        bentoBox = _bentoBox;
+        vault = _vault;
         react = _react;
         weth = _weth;
         pairCodeHash = _pairCodeHash;
@@ -108,7 +108,7 @@ contract ReactMakerKashi is Ownable {
 
         // convert Bento shares to underlying Kashi asset (`token0`) balance (`amount0`) for Maker
         address token0 = kashiPair.asset();
-        (uint256 amount0, ) = bentoBox.withdraw(IERC20(token0), address(this), address(this), 0, bentoShares);
+        (uint256 amount0, ) = vault.withdraw(IERC20(token0), address(this), address(this), 0, bentoShares);
 
         emit LogConvert(
             msg.sender,
