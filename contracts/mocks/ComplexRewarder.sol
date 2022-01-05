@@ -16,7 +16,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
 
     IERC20 private immutable rewardToken;
 
-    /// @notice Info of each MCV2 user.
+    /// @notice Info of each RMV2 user.
     /// `amount` LP token amount the user has provided.
     /// `rewardDebt` The amount of REACT entitled to the user.
     struct UserInfo {
@@ -24,7 +24,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         uint256 rewardDebt;
     }
 
-    /// @notice Info of each MCV2 pool.
+    /// @notice Info of each RMV2 pool.
     /// `allocPoint` The amount of allocation points assigned to the pool.
     /// Also known as the amount of REACT to distribute per block.
     struct PoolInfo {
@@ -46,7 +46,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     uint256 public tokenPerBlock;
     uint256 private constant ACC_TOKEN_PRECISION = 1e12;
 
-    address private immutable MASTERCHEF_V2;
+    address private immutable REACTMASTER_V2;
 
     event LogOnReward(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
     event LogPoolAddition(uint256 indexed pid, uint256 allocPoint);
@@ -54,14 +54,14 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     event LogUpdatePool(uint256 indexed pid, uint64 lastRewardBlock, uint256 lpSupply, uint256 accReactPerShare);
     event LogInit();
 
-    constructor (IERC20 _rewardToken, uint256 _tokenPerBlock, address _MASTERCHEF_V2) public {
+    constructor (IERC20 _rewardToken, uint256 _tokenPerBlock, address _REACTMASTER_V2) public {
         rewardToken = _rewardToken;
         tokenPerBlock = _tokenPerBlock;
-        MASTERCHEF_V2 = _MASTERCHEF_V2;
+        REACTMASTER_V2 = _REACTMASTER_V2;
     }
 
 
-    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpToken) onlyMCV2 override external {
+    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpToken) onlyRMV2 override external {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][_user];
         uint256 pending;
@@ -85,15 +85,15 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         return (_rewardTokens, _rewardAmounts);
     }
 
-    modifier onlyMCV2 {
+    modifier onlyRMV2 {
         require(
-            msg.sender == MASTERCHEF_V2,
-            "Only MCV2 can call this function."
+            msg.sender == REACTMASTER_V2,
+            "Only RMV2 can call this function."
         );
         _;
     }
 
-    /// @notice Returns the number of MCV2 pools.
+    /// @notice Returns the number of RMV2 pools.
     function poolLength() public view returns (uint256 pools) {
         pools = poolIds.length;
     }
@@ -101,7 +101,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     /// @notice Add a new LP to the pool.  Can only be called by the owner.
     /// DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     /// @param allocPoint AP of the new pool.
-    /// @param _pid Pid on MCV2
+    /// @param _pid Pid on RMV2
     function add(uint256 allocPoint, uint256 _pid) public onlyOwner {
         require(poolInfo[_pid].lastRewardBlock == 0, "Pool already exists");
         uint256 lastRewardBlock = block.number;
@@ -133,7 +133,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accReactPerShare = pool.accReactPerShare;
-        uint256 lpSupply = ReactMasterV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
+        uint256 lpSupply = ReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(REACTMASTER_V2);
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 blocks = block.number.sub(pool.lastRewardBlock);
             uint256 reactReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
@@ -158,7 +158,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         pool = poolInfo[pid];
         require(pool.lastRewardBlock != 0, "Pool does not exist");
         if (block.number > pool.lastRewardBlock) {
-            uint256 lpSupply = ReactMasterV2(MASTERCHEF_V2).lpToken(pid).balanceOf(MASTERCHEF_V2);
+            uint256 lpSupply = ReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(REACTMASTER_V2);
 
             if (lpSupply > 0) {
                 uint256 blocks = block.number.sub(pool.lastRewardBlock);

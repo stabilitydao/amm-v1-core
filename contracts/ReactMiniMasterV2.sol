@@ -18,7 +18,7 @@ interface IMigrator {
 
 /// @notice The (older) ReactMaster contract gives out a constant number of REACT tokens per block.
 /// It is the only address with minting rights for REACT.
-/// The idea for this ReactMaster V2 (MCV2) contract is therefore to be the owner of a dummy token
+/// The idea for this ReactMaster V2 (RMV2) contract is therefore to be the owner of a dummy token
 /// that is deposited into the ReactMaster V1 (MCV1) contract.
 /// The allocation point for this pool on MCV1 is the total allocation point for all pools that receive double incentives.
 contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
@@ -27,7 +27,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
     using BoringERC20 for IERC20;
     using SignedSafeMath for int256;
 
-    /// @notice Info of each MCV2 user.
+    /// @notice Info of each RMV2 user.
     /// `amount` LP token amount the user has provided.
     /// `rewardDebt` The amount of REACT entitled to the user.
     struct UserInfo {
@@ -35,7 +35,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
         int256 rewardDebt;
     }
 
-    /// @notice Info of each MCV2 pool.
+    /// @notice Info of each RMV2 pool.
     /// `allocPoint` The amount of allocation points assigned to the pool.
     /// Also known as the amount of REACT to distribute per block.
     struct PoolInfo {
@@ -49,11 +49,11 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
     // @notice The migrator contract. It has a lot of power. Can only be set through governance (owner).
     IMigrator public migrator;
 
-    /// @notice Info of each MCV2 pool.
+    /// @notice Info of each RMV2 pool.
     PoolInfo[] public poolInfo;
-    /// @notice Address of the LP token for each MCV2 pool.
+    /// @notice Address of the LP token for each RMV2 pool.
     IERC20[] public lpToken;
-    /// @notice Address of each `IRewarder` contract in MCV2.
+    /// @notice Address of each `IRewarder` contract in RMV2.
     IRewarder[] public rewarder;
 
     /// @notice Info of each user that stakes LP tokens.
@@ -78,7 +78,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
         REACT = _react;
     }
 
-    /// @notice Returns the number of MCV2 pools.
+    /// @notice Returns the number of RMV2 pools.
     function poolLength() public view returns (uint256 pools) {
         pools = poolInfo.length;
     }
@@ -182,7 +182,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
         }
     }
 
-    /// @notice Deposit LP tokens to MCV2 for REACT allocation.
+    /// @notice Deposit LP tokens to RMV2 for REACT allocation.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to deposit.
     /// @param to The receiver of `amount` deposit benefit.
@@ -205,7 +205,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
         emit Deposit(msg.sender, pid, amount, to);
     }
 
-    /// @notice Withdraw LP tokens from MCV2.
+    /// @notice Withdraw LP tokens from RMV2.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens.
@@ -253,7 +253,7 @@ contract ReactMiniMasterV2 is BoringOwnable, BoringBatchable {
         emit Harvest(msg.sender, pid, _pendingReact);
     }
     
-    /// @notice Withdraw LP tokens from MCV2 and harvest proceeds for transaction sender to `to`.
+    /// @notice Withdraw LP tokens from RMV2 and harvest proceeds for transaction sender to `to`.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens and REACT rewards.

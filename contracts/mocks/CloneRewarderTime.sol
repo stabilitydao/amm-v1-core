@@ -44,15 +44,15 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     IERC20 public masterLpToken;
     uint256 private constant ACC_TOKEN_PRECISION = 1e12;
 
-    address public immutable MASTERCHEF_V2;
+    address public immutable REACTMASTER_V2;
 
     event LogOnReward(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
     event LogUpdatePool(uint256 indexed pid, uint64 lastRewardTime, uint256 lpSupply, uint256 accToken1PerShare);
     event LogRewardPerSecond(uint256 rewardPerSecond);
     event LogInit(IERC20 indexed rewardToken, address owner, uint256 rewardPerSecond, IERC20 indexed masterLpToken);
 
-    constructor (address _MASTERCHEF_V2) public {
-        MASTERCHEF_V2 = _MASTERCHEF_V2;
+    constructor (address _REACTMASTER_V2) public {
+        REACTMASTER_V2 = _REACTMASTER_V2;
     }
 
     /// @notice Serves as the constructor for clones, as clones can't have a regular constructor
@@ -64,8 +64,8 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
         emit LogInit(rewardToken, owner, rewardPerSecond, masterLpToken);
     }
 
-    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyMCV2 override external {
-        require(IReactMasterV2(MASTERCHEF_V2).lpToken(pid) == masterLpToken);
+    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyRMV2 override external {
+        require(IReactMasterV2(REACTMASTER_V2).lpToken(pid) == masterLpToken);
 
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][_user];
@@ -103,10 +103,10 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
         emit LogRewardPerSecond(_rewardPerSecond);
     }
 
-    modifier onlyMCV2 {
+    modifier onlyRMV2 {
         require(
-            msg.sender == MASTERCHEF_V2,
-            "Only MCV2 can call this function."
+            msg.sender == REACTMASTER_V2,
+            "Only RMV2 can call this function."
         );
         _;
     }
@@ -119,7 +119,7 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accToken1PerShare = pool.accToken1PerShare;
-        uint256 lpSupply = IReactMasterV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
+        uint256 lpSupply = IReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(REACTMASTER_V2);
         if (block.timestamp > pool.lastRewardTime && lpSupply != 0) {
             uint256 time = block.timestamp.sub(pool.lastRewardTime);
             uint256 reactReward = time.mul(rewardPerSecond);
@@ -134,7 +134,7 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
         pool = poolInfo[pid];
         if (block.timestamp > pool.lastRewardTime) {
-            uint256 lpSupply = IReactMasterV2(MASTERCHEF_V2).lpToken(pid).balanceOf(MASTERCHEF_V2);
+            uint256 lpSupply = IReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(REACTMASTER_V2);
 
             if (lpSupply > 0) {
                 uint256 time = block.timestamp.sub(pool.lastRewardTime);
