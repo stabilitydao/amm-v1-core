@@ -52,7 +52,7 @@ contract ReactMakerKashi is Ownable {
         address indexed server,
         address indexed token0,
         uint256 amount0,
-        uint256 amountBENTO,
+        uint256 amountVAULT,
         uint256 amountREACT
     );
 
@@ -103,18 +103,18 @@ contract ReactMakerKashi is Ownable {
         // update Kashi fees for this Maker contract (`feeTo`)
         kashiPair.withdrawFees();
 
-        // convert updated Kashi balance to Bento shares
-        uint256 bentoShares = kashiPair.removeAsset(address(this), kashiPair.balanceOf(address(this)));
+        // convert updated Kashi balance to Vault shares
+        uint256 vaultShares = kashiPair.removeAsset(address(this), kashiPair.balanceOf(address(this)));
 
-        // convert Bento shares to underlying Kashi asset (`token0`) balance (`amount0`) for Maker
+        // convert Vault shares to underlying Kashi asset (`token0`) balance (`amount0`) for Maker
         address token0 = kashiPair.asset();
-        (uint256 amount0, ) = vault.withdraw(IERC20(token0), address(this), address(this), 0, bentoShares);
+        (uint256 amount0, ) = vault.withdraw(IERC20(token0), address(this), address(this), 0, vaultShares);
 
         emit LogConvert(
             msg.sender,
             token0,
             amount0,
-            bentoShares,
+            vaultShares,
             _convertStep(token0, amount0)
         );
     }
