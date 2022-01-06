@@ -23,7 +23,7 @@ yarn test
 ### Single files
 
 ```sh
-yarn test test/ReactRoll.test.js
+yarn test test/ReactRoll.test.ts
 ```
 
 Mocha & Chai with Waffle matchers (these are really useful).
