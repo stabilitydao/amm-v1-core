@@ -14,13 +14,17 @@ module.exports = async function ({ getNamedAccounts, getChainId, deployments }) 
 
   const chainId = await getChainId()
 
+  const reactswapRouterAddress = (await deployments.get("UniswapV2Router02")).address
+
+  UNISWAP_ROUTER.set("31337", reactswapRouterAddress)
+
   if (!UNISWAP_ROUTER.has(chainId)) {
     throw Error("No Uniswap Router")
   }
 
   const uniswapRouterAddress = UNISWAP_ROUTER.get(chainId)
 
-  const reactswapRouterAddress = (await deployments.get("UniswapV2Router02")).address
+
 
   await deploy("ReactRoll", {
     from: deployer,

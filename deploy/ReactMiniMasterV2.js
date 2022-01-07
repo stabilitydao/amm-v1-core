@@ -1,9 +1,9 @@
-const { ChainId } = require("@reactswap/sdk")
+const { WETH } = require("@sushiswap/sdk")
 
 
-const REACT = {
+/*const REACT = {
   [ChainId.MATIC]: '0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a'
-}
+}*/
 
 module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   const { deploy } = deployments
@@ -14,13 +14,13 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
 
   let reactAddress;
 
-  if (chainId === '31337') {
+  // if (chainId === '31337') {
     reactAddress = (await deployments.get("ReactToken")).address
-  } else if (chainId in REACT) {
-    reactAddress = REACT[chainId]
-  } else {
-    throw Error("No REACT!")
-  }
+  // } else if (chainId in REACT) {
+  //   reactAddress = REACT[chainId]
+  // } else {
+  //   throw Error("No REACT!")
+  // }
 
   await deploy("ReactMiniMasterV2", {
     from: deployer,
@@ -38,3 +38,4 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
 
 module.exports.tags = ["ReactMiniMasterV2"]
 // module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02"]
+module.exports.dependencies = ["ReactToken"]
