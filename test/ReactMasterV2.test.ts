@@ -1,18 +1,26 @@
 import { expect, assert } from "chai";
 import { advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZERO } from "./utilities"
+import {ethers, upgrades} from "hardhat";
+import {ReactToken, ReactToken__factory} from "../types";
 
 describe("ReactMasterV2", function () {
   before(async function () {
-    await prepare(this, ['ReactMaster', 'ReactToken', 'ERC20Mock', 'ReactMasterV2', 'RewarderMock', 'RewarderBrokenMock'])
+    this.ReactToken = (await ethers.getContractFactory(
+        'ReactToken'
+    )) as ReactToken__factory
+
+    await prepare(this, ['ReactMaster', 'ERC20Mock', 'ReactMasterV2', 'RewarderMock', 'RewarderBrokenMock'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
   })
 
   beforeEach(async function () {
-    await deploy(this, [
-      ["react", this.ReactToken],
-    ])
+    this.react = (await upgrades.deployProxy(this.ReactToken, {
+      kind: 'uups',
+    })) as ReactToken
+
+    await this.react.deployed()
 
     await deploy(this,
       [["lp", this.ERC20Mock, ["LP Token", "LPT", getBigNumber(10)]],
@@ -20,7 +28,7 @@ describe("ReactMasterV2", function () {
       ['chief', this.ReactMaster, [this.react.address, this.bob.address, getBigNumber(100), "0", "0"]]
     ])
 
-    await this.react.transferOwnership(this.chief.address)
+    this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
     await this.chief.add(100, this.lp.address, true)
     await this.chief.add(100, this.dummy.address, true)
     await this.lp.approve(this.chief.address, getBigNumber(10))

@@ -1,9 +1,14 @@
-import { ethers } from "hardhat";
+// @ts-ignore
+import { ethers, upgrades  } from "hardhat";
 import { expect } from "chai";
+import {ReactToken, ReactToken__factory} from "../types";
 
 describe("ReactBar", function () {
   before(async function () {
-    this.ReactToken = await ethers.getContractFactory("ReactToken")
+    this.ReactToken = (await ethers.getContractFactory(
+        'ReactToken'
+    )) as ReactToken__factory
+
     this.ReactBar = await ethers.getContractFactory("ReactBar")
 
     this.signers = await ethers.getSigners()
@@ -13,8 +18,13 @@ describe("ReactBar", function () {
   })
 
   beforeEach(async function () {
-    this.react = await this.ReactToken.deploy()
+    this.react = (await upgrades.deployProxy(this.ReactToken, {
+      kind: 'uups',
+    })) as ReactToken
+
+    await this.react.deployed()
     this.bar = await this.ReactBar.deploy(this.react.address)
+    this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.alice.address)
     this.react.mint(this.alice.address, "100")
     this.react.mint(this.bob.address, "100")
     this.react.mint(this.carol.address, "100")

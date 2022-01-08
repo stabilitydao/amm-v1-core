@@ -14,6 +14,7 @@ import "hardhat-typechain"
 import "hardhat-watcher"
 import "solidity-coverage"
 import "./tasks"
+import '@openzeppelin/hardhat-upgrades'
 
 import { HardhatUserConfig } from "hardhat/types"
 import { removeConsoleLog } from "hardhat-preprocessor"
@@ -50,7 +51,7 @@ const config: HardhatUserConfig = {
     },
     dev: {
       // Default to 1
-      default: 1,
+      default: 0,
       // dev address mainnet
       // 1: "",
     },
@@ -281,6 +282,15 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: "0.6.12",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
+        version: "0.8.2",
         settings: {
           optimizer: {
             enabled: true,

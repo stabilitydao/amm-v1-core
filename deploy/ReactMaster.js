@@ -12,11 +12,27 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     deterministicDeployment: false
   })
 
-  if (await react.owner() !== address) {
+  const MINTER_ROLE = ethers.utils.id('MINTER_ROLE')
+  let tx = await react.grantRole(MINTER_ROLE, address)
+  process.stdout.write(
+      `Grant DividendToken MINTER_ROLE to DividendMinter (tx: ${tx.hash})...: `
+  )
+
+  let receipt = await tx.wait()
+  if (receipt.status) {
+    console.log(
+        `done (block: ${
+            receipt.blockNumber
+        }) with ${receipt.gasUsed.toNumber()} gas`
+    )
+  } else {
+    console.log(`REVERTED!`)
+  }
+  /*if (await react.owner() !== address) {
     // Transfer React Ownership to Chef
     console.log("Transfer React Ownership to Chef")
     await (await react.transferOwnership(address)).wait()
-  }
+  }*/
 
   const reactMaster = await ethers.getContract("ReactMaster")
   if (await reactMaster.owner() !== dev) {

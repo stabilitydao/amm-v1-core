@@ -1,5 +1,6 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
+import {ReactToken, ReactToken__factory} from "../types";
 
 describe("Migrator", function () {
   before(async function () {
@@ -12,7 +13,9 @@ describe("Migrator", function () {
     this.UniswapV2Factory = await ethers.getContractFactory("UniswapV2Factory")
     this.UniswapV2Pair = await ethers.getContractFactory("UniswapV2Pair")
     this.ERC20Mock = await ethers.getContractFactory("ERC20Mock", this.minter)
-    this.ReactToken = await ethers.getContractFactory("ReactToken")
+    this.ReactToken = (await ethers.getContractFactory(
+        'ReactToken'
+    )) as ReactToken__factory
     this.ReactMaster = await ethers.getContractFactory("ReactMaster")
     this.Migrator = await ethers.getContractFactory("Migrator")
   })
@@ -24,7 +27,9 @@ describe("Migrator", function () {
     this.factory2 = await this.UniswapV2Factory.deploy(this.alice.address)
     await this.factory2.deployed()
 
-    this.react = await this.ReactToken.deploy()
+    this.react = (await upgrades.deployProxy(this.ReactToken, {
+      kind: 'uups',
+    })) as ReactToken
     await this.react.deployed()
 
     this.weth = await this.ERC20Mock.deploy("WETH", "WETH", "100000000")
@@ -47,7 +52,7 @@ describe("Migrator", function () {
     this.migrator = await this.Migrator.deploy(this.chief.address, this.factory1.address, this.factory2.address, "0")
     await this.migrator.deployed()
 
-    await this.react.transferOwnership(this.chief.address)
+    this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
 
     await this.chief.add("100", this.lp1.address, true)
   })

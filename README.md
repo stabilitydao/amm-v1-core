@@ -1,23 +1,17 @@
 # ReactSwap
 
-https://sushi.com/
+https://reactswap.com/
 
-## Deployed Contracts
+## Stability DAO Unit
 
-https://dev.sushi.com/sushiswap/contracts
+DeX AMM with liquidity migration support, yield farms, staking pool and lending markets.
 
-## Docs
-
-[Development](docs/DEVELOPMENT.md)
-
-[Deployment](docs/DEPLOYMENT.md)
-
-[History](docs/HISTORY.md)
-
-## Security
-
-[Security Policy](SECURITY.md)
-
-## License
-
-[MIT](LICENSE.txt)
+Changes from SushiSwap contracts:
+* Modified token
+  * Role based access control
+  * Flash minting
+  * Upgradeable (UUPS-proxy)
+* No governance (manages by Stability DAO) 
+* Modern technology stack 
+  * OpenZeppelin 4.4
+  * Solidity 0.8

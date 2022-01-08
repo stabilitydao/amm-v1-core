@@ -1,20 +1,27 @@
 import { expect, assert } from "chai";
 import { advanceTime, advanceTimeAndBlock, advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZERO } from "./utilities"
 const { BigNumber } = require("ethers")
-import {ethers} from "hardhat"
+import {ethers, upgrades} from "hardhat"
+import {ReactToken, ReactToken__factory} from "../types";
 
 describe("ReactMiniMasterV2", function () {
   before(async function () {
-    await prepare(this, ['ReactMiniMasterV2', 'ReactToken', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
+    this.ReactToken = (await ethers.getContractFactory(
+        'ReactToken'
+    )) as ReactToken__factory
+
+    await prepare(this, ['ReactMiniMasterV2', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
   })
 
   beforeEach(async function () {
-    await deploy(this, [
-      ["react", this.ReactToken],
-    ])
+    this.react = (await upgrades.deployProxy(this.ReactToken, {
+      kind: 'uups',
+    })) as ReactToken
+
+    await this.react.deployed()
 
     await deploy(this,
       [["lp", this.ERC20Mock, ["LP Token", "LPT", getBigNumber(10)]],
@@ -25,6 +32,7 @@ describe("ReactMiniMasterV2", function () {
     ])
     await deploy(this, [["rewarder", this.RewarderMock, [getBigNumber(1), this.r.address, this.chief.address]]])
 
+    this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.signers[0].address)
     await this.react.mint(this.chief.address, getBigNumber(10000))
     await this.lp.approve(this.chief.address, getBigNumber(10))
     await this.chief.setReactPerSecond("10000000000000000")

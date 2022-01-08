@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Router01.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
@@ -91,12 +91,12 @@ contract ReactRoll {
     // calculates the CREATE2 address for a pair without making any external calls
     function pairForOldRouter(address tokenA, address tokenB) internal view returns (address pair) {
         (address token0, address token1) = UniswapV2Library.sortTokens(tokenA, tokenB);
-        pair = address(uint(keccak256(abi.encodePacked(
+        pair = address(uint160(uint256(keccak256(abi.encodePacked(
                 hex'ff',
                 oldRouter.factory(),
                 keccak256(abi.encodePacked(token0, token1)),
                 hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
-            ))));
+            )))));
     }
 
     function addLiquidity(

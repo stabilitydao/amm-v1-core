@@ -9,7 +9,7 @@ import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 import "../ReactMasterV2.sol";
 
 /// @author @0xKeno
-contract ComplexRewarder is IRewarder,  BoringOwnable{
+contract ComplexRewarder is IRewarder, BoringOwnable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;
@@ -34,12 +34,12 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     }
 
     /// @notice Info of each pool.
-    mapping (uint256 => PoolInfo) public poolInfo;
+    mapping(uint256 => PoolInfo) public poolInfo;
 
     uint256[] public poolIds;
 
     /// @notice Info of each user that stakes LP tokens.
-    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     /// @dev Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 totalAllocPoint;
 
@@ -48,36 +48,65 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
 
     address private immutable REACTMASTER_V2;
 
-    event LogOnReward(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
+    event LogOnReward(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount,
+        address indexed to
+    );
     event LogPoolAddition(uint256 indexed pid, uint256 allocPoint);
     event LogSetPool(uint256 indexed pid, uint256 allocPoint);
-    event LogUpdatePool(uint256 indexed pid, uint64 lastRewardBlock, uint256 lpSupply, uint256 accReactPerShare);
+    event LogUpdatePool(
+        uint256 indexed pid,
+        uint64 lastRewardBlock,
+        uint256 lpSupply,
+        uint256 accReactPerShare
+    );
     event LogInit();
 
-    constructor (IERC20 _rewardToken, uint256 _tokenPerBlock, address _REACTMASTER_V2) public {
+    constructor(
+        IERC20 _rewardToken,
+        uint256 _tokenPerBlock,
+        address _REACTMASTER_V2
+    ) public {
         rewardToken = _rewardToken;
         tokenPerBlock = _tokenPerBlock;
         REACTMASTER_V2 = _REACTMASTER_V2;
     }
 
-
-    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpToken) onlyRMV2 override external {
+    function onReactReward(
+        uint256 pid,
+        address _user,
+        address to,
+        uint256,
+        uint256 lpToken
+    ) external override onlyRMV2 {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][_user];
         uint256 pending;
         if (user.amount > 0) {
-            pending =
-                (user.amount.mul(pool.accReactPerShare) / ACC_TOKEN_PRECISION).sub(
-                    user.rewardDebt
-                );
+            pending = (user.amount.mul(pool.accReactPerShare) /
+                ACC_TOKEN_PRECISION)
+                .sub(user.rewardDebt);
             rewardToken.safeTransfer(to, pending);
         }
         user.amount = lpToken;
-        user.rewardDebt = lpToken.mul(pool.accReactPerShare) / ACC_TOKEN_PRECISION;
+        user.rewardDebt =
+            lpToken.mul(pool.accReactPerShare) /
+            ACC_TOKEN_PRECISION;
         emit LogOnReward(_user, pid, pending, to);
     }
-    
-    function pendingTokens(uint256 pid, address user, uint256) override external view returns (IERC20[] memory rewardTokens, uint256[] memory rewardAmounts) {
+
+    function pendingTokens(
+        uint256 pid,
+        address user,
+        uint256
+    )
+        external
+        view
+        override
+        returns (IERC20[] memory rewardTokens, uint256[] memory rewardAmounts)
+    {
         IERC20[] memory _rewardTokens = new IERC20[](1);
         _rewardTokens[0] = (rewardToken);
         uint256[] memory _rewardAmounts = new uint256[](1);
@@ -120,7 +149,9 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
     function set(uint256 _pid, uint256 _allocPoint) public onlyOwner {
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
+        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
+            _allocPoint
+        );
         poolInfo[_pid].allocPoint = _allocPoint.to64();
         emit LogSetPool(_pid, _allocPoint);
     }
@@ -129,17 +160,30 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending REACT reward for a given user.
-    function pendingToken(uint256 _pid, address _user) public view returns (uint256 pending) {
+    function pendingToken(uint256 _pid, address _user)
+        public
+        view
+        returns (uint256 pending)
+    {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accReactPerShare = pool.accReactPerShare;
-        uint256 lpSupply = ReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(REACTMASTER_V2);
+        uint256 lpSupply =
+            ReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(
+                REACTMASTER_V2
+            );
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 blocks = block.number.sub(pool.lastRewardBlock);
-            uint256 reactReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
-            accReactPerShare = accReactPerShare.add(reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply);
+            uint256 reactReward =
+                blocks.mul(tokenPerBlock).mul(pool.allocPoint) /
+                    totalAllocPoint;
+            accReactPerShare = accReactPerShare.add(
+                reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply
+            );
         }
-        pending = (user.amount.mul(accReactPerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
+        pending = (user.amount.mul(accReactPerShare) / ACC_TOKEN_PRECISION).sub(
+            user.rewardDebt
+        );
     }
 
     /// @notice Update reward variables for all pools. Be careful of gas spending!
@@ -158,17 +202,28 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         pool = poolInfo[pid];
         require(pool.lastRewardBlock != 0, "Pool does not exist");
         if (block.number > pool.lastRewardBlock) {
-            uint256 lpSupply = ReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(REACTMASTER_V2);
+            uint256 lpSupply =
+                ReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(
+                    REACTMASTER_V2
+                );
 
             if (lpSupply > 0) {
                 uint256 blocks = block.number.sub(pool.lastRewardBlock);
-                uint256 reactReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
-                pool.accReactPerShare = pool.accReactPerShare.add((reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128());
+                uint256 reactReward =
+                    blocks.mul(tokenPerBlock).mul(pool.allocPoint) /
+                        totalAllocPoint;
+                pool.accReactPerShare = pool.accReactPerShare.add(
+                    (reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128()
+                );
             }
             pool.lastRewardBlock = block.number.to64();
             poolInfo[pid] = pool;
-            emit LogUpdatePool(pid, pool.lastRewardBlock, lpSupply, pool.accReactPerShare);
+            emit LogUpdatePool(
+                pid,
+                pool.lastRewardBlock,
+                lpSupply,
+                pool.accReactPerShare
+            );
         }
     }
-
 }

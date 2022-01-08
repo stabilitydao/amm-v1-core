@@ -31,12 +31,19 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
 
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     /// @notice EIP 2612
     function permit(
@@ -106,7 +113,9 @@ interface IStrategy {
     /// @param balance The amount of tokens the caller thinks it has invested.
     /// @param sender The address of the initiator of this transaction. Can be used for reimbursements, etc.
     /// @return amountAdded The delta (+profit or -loss) that occured in contrast to `balance`.
-    function harvest(uint256 balance, address sender) external returns (int256 amountAdded);
+    function harvest(uint256 balance, address sender)
+        external
+        returns (int256 amountAdded);
 
     /// @notice Withdraw assets. The returned amount can differ from the requested amount due to rounding.
     /// @dev The `actualAmount` should be very close to the amount.
@@ -141,8 +150,14 @@ library BoringERC20 {
         address to,
         uint256 amount
     ) internal {
-        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(SIG_TRANSFER, to, amount));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "BoringERC20: Transfer failed");
+        (bool success, bytes memory data) =
+            address(token).call(
+                abi.encodeWithSelector(SIG_TRANSFER, to, amount)
+            );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "BoringERC20: Transfer failed"
+        );
     }
 
     /// @notice Provides a safe ERC20.transferFrom version for different ERC-20 implementations.
@@ -157,8 +172,14 @@ library BoringERC20 {
         address to,
         uint256 amount
     ) internal {
-        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(SIG_TRANSFER_FROM, from, to, amount));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "BoringERC20: TransferFrom failed");
+        (bool success, bytes memory data) =
+            address(token).call(
+                abi.encodeWithSelector(SIG_TRANSFER_FROM, from, to, amount)
+            );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "BoringERC20: TransferFrom failed"
+        );
     }
 }
 
@@ -326,13 +347,19 @@ library RebaseLibrary {
 
     /// @notice Add `elastic` to `total` and update storage.
     /// @return newElastic Returns updated `elastic`.
-    function addElastic(Rebase storage total, uint256 elastic) internal returns (uint256 newElastic) {
+    function addElastic(Rebase storage total, uint256 elastic)
+        internal
+        returns (uint256 newElastic)
+    {
         newElastic = total.elastic = total.elastic.add(elastic.to128());
     }
 
     /// @notice Subtract `elastic` from `total` and update storage.
     /// @return newElastic Returns updated `elastic`.
-    function subElastic(Rebase storage total, uint256 elastic) internal returns (uint256 newElastic) {
+    function subElastic(Rebase storage total, uint256 elastic)
+        internal
+        returns (uint256 newElastic)
+    {
         newElastic = total.elastic = total.elastic.sub(elastic.to128());
     }
 }
@@ -349,7 +376,10 @@ contract BoringOwnableData {
 }
 
 contract BoringOwnable is BoringOwnableData {
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /// @notice `owner` defaults to msg.sender on construction.
     constructor() public {
@@ -369,7 +399,10 @@ contract BoringOwnable is BoringOwnableData {
     ) public onlyOwner {
         if (direct) {
             // Checks
-            require(newOwner != address(0) || renounce, "Ownable: zero address");
+            require(
+                newOwner != address(0) || renounce,
+                "Ownable: zero address"
+            );
 
             // Effects
             emit OwnershipTransferred(owner, newOwner);
@@ -386,7 +419,10 @@ contract BoringOwnable is BoringOwnableData {
         address _pendingOwner = pendingOwner;
 
         // Checks
-        require(msg.sender == _pendingOwner, "Ownable: caller != pending owner");
+        require(
+            msg.sender == _pendingOwner,
+            "Ownable: caller != pending owner"
+        );
 
         // Effects
         emit OwnershipTransferred(owner, _pendingOwner);
@@ -416,7 +452,11 @@ interface IMasterContract {
 // License-Identifier: MIT
 
 contract BoringFactory {
-    event LogDeploy(address indexed masterContract, bytes data, address indexed cloneAddress);
+    event LogDeploy(
+        address indexed masterContract,
+        bytes data,
+        address indexed cloneAddress
+    );
 
     /// @notice Mapping from clone contracts to their masterContract.
     mapping(address => address) public masterContractOf;
@@ -433,7 +473,10 @@ contract BoringFactory {
         bytes calldata data,
         bool useCreate2
     ) public payable returns (address cloneAddress) {
-        require(masterContract != address(0), "BoringFactory: No masterContract");
+        require(
+            masterContract != address(0),
+            "BoringFactory: No masterContract"
+        );
         bytes20 targetBytes = bytes20(masterContract); // Takes the first 20 bytes of the masterContract's address
 
         if (useCreate2) {
@@ -443,17 +486,29 @@ contract BoringFactory {
             // Creates clone, more info here: https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/
             assembly {
                 let clone := mload(0x40)
-                mstore(clone, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+                mstore(
+                    clone,
+                    0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000
+                )
                 mstore(add(clone, 0x14), targetBytes)
-                mstore(add(clone, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+                mstore(
+                    add(clone, 0x28),
+                    0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000
+                )
                 cloneAddress := create2(0, clone, 0x37, salt)
             }
         } else {
             assembly {
                 let clone := mload(0x40)
-                mstore(clone, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+                mstore(
+                    clone,
+                    0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000
+                )
                 mstore(add(clone, 0x14), targetBytes)
-                mstore(add(clone, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+                mstore(
+                    add(clone, 0x28),
+                    0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000
+                )
                 cloneAddress := create(0, clone, 0x37)
             }
         }
@@ -469,8 +524,15 @@ contract BoringFactory {
 // License-Identifier: UNLICENSED
 
 contract MasterContractManager is BoringOwnable, BoringFactory {
-    event LogWhiteListMasterContract(address indexed masterContract, bool approved);
-    event LogSetMasterContractApproval(address indexed masterContract, address indexed user, bool approved);
+    event LogWhiteListMasterContract(
+        address indexed masterContract,
+        bool approved
+    );
+    event LogSetMasterContractApproval(
+        address indexed masterContract,
+        address indexed user,
+        bool approved
+    );
     event LogRegisterProtocol(address indexed protocol);
 
     /// @notice masterContract to user to approval state
@@ -480,11 +542,17 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
     /// @notice user nonces for masterContract approvals
     mapping(address => uint256) public nonces;
 
-    bytes32 private constant DOMAIN_SEPARATOR_SIGNATURE_HASH = keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
+    bytes32 private constant DOMAIN_SEPARATOR_SIGNATURE_HASH =
+        keccak256(
+            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
+        );
     // See https://eips.ethereum.org/EIPS/eip-191
-    string private constant EIP191_PREFIX_FOR_EIP712_STRUCTURED_DATA = "\x19\x01";
+    string private constant EIP191_PREFIX_FOR_EIP712_STRUCTURED_DATA =
+        "\x19\x01";
     bytes32 private constant APPROVAL_SIGNATURE_HASH =
-        keccak256("SetMasterContractApproval(string warning,address user,address masterContract,bool approved,uint256 nonce)");
+        keccak256(
+            "SetMasterContractApproval(string warning,address user,address masterContract,bool approved,uint256 nonce)"
+        );
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 private immutable _DOMAIN_SEPARATOR;
@@ -496,11 +564,25 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
         assembly {
             chainId := chainid()
         }
-        _DOMAIN_SEPARATOR = _calculateDomainSeparator(DOMAIN_SEPARATOR_CHAIN_ID = chainId);
+        _DOMAIN_SEPARATOR = _calculateDomainSeparator(
+            DOMAIN_SEPARATOR_CHAIN_ID = chainId
+        );
     }
 
-    function _calculateDomainSeparator(uint256 chainId) private view returns (bytes32) {
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_SIGNATURE_HASH, keccak256("Vault V1"), chainId, address(this)));
+    function _calculateDomainSeparator(uint256 chainId)
+        private
+        view
+        returns (bytes32)
+    {
+        return
+            keccak256(
+                abi.encode(
+                    DOMAIN_SEPARATOR_SIGNATURE_HASH,
+                    keccak256("Vault V1"),
+                    chainId,
+                    address(this)
+                )
+            );
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -509,7 +591,10 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
         assembly {
             chainId := chainid()
         }
-        return chainId == DOMAIN_SEPARATOR_CHAIN_ID ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId);
+        return
+            chainId == DOMAIN_SEPARATOR_CHAIN_ID
+                ? _DOMAIN_SEPARATOR
+                : _calculateDomainSeparator(chainId);
     }
 
     /// @notice Other contracts need to register with this master contract so that users can approve them for the Vault.
@@ -519,7 +604,10 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
     }
 
     /// @notice Enables or disables a contract for approval without signed message.
-    function whitelistMasterContract(address masterContract, bool approved) public onlyOwner {
+    function whitelistMasterContract(address masterContract, bool approved)
+        public
+        onlyOwner
+    {
         // Checks
         require(masterContract != address(0), "MasterCMgr: Cannot approve 0");
 
@@ -552,8 +640,14 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
         // If no signature is provided, the fallback is executed
         if (r == 0 && s == 0 && v == 0) {
             require(user == msg.sender, "MasterCMgr: user not sender");
-            require(masterContractOf[user] == address(0), "MasterCMgr: user is clone");
-            require(whitelistedMasterContracts[masterContract], "MasterCMgr: not whitelisted");
+            require(
+                masterContractOf[user] == address(0),
+                "MasterCMgr: user is clone"
+            );
+            require(
+                whitelistedMasterContracts[masterContract],
+                "MasterCMgr: not whitelisted"
+            );
         } else {
             // Important for security - any address without masterContract has address(0) as masterContract
             // So approving address(0) would approve every address, leading to full loss of funds
@@ -575,7 +669,9 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
                             abi.encode(
                                 APPROVAL_SIGNATURE_HASH,
                                 approved
-                                    ? keccak256("Give FULL access to funds in (and approved to) Vault?")
+                                    ? keccak256(
+                                        "Give FULL access to funds in (and approved to) Vault?"
+                                    )
                                     : keccak256("Revoke access to Vault?"),
                                 user,
                                 masterContract,
@@ -601,7 +697,11 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
 contract BaseBoringBatchable {
     /// @dev Helper function to extract a useful revert message from a failed call.
     /// If the returned data is malformed or not correctly abi encoded then this call can fail itself.
-    function _getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    function _getRevertMsg(bytes memory _returnData)
+        internal
+        pure
+        returns (string memory)
+    {
         // If the _res length is less than 68, then the transaction failed silently (without a revert message)
         if (_returnData.length < 68) return "Transaction reverted silently";
 
@@ -621,11 +721,16 @@ contract BaseBoringBatchable {
     // F2: Calls in the batch may be payable, delegatecall operates in the same context, so each call in the batch has access to msg.value
     // C3: The length of the loop is fully under user control, so can't be exploited
     // C7: Delegatecall is only used on the same contract, so it's safe
-    function batch(bytes[] calldata calls, bool revertOnFail) external payable returns (bool[] memory successes, bytes[] memory results) {
+    function batch(bytes[] calldata calls, bool revertOnFail)
+        external
+        payable
+        returns (bool[] memory successes, bytes[] memory results)
+    {
         successes = new bool[](calls.length);
         results = new bytes[](calls.length);
         for (uint256 i = 0; i < calls.length; i++) {
-            (bool success, bytes memory result) = address(this).delegatecall(calls[i]);
+            (bool success, bytes memory result) =
+                address(this).delegatecall(calls[i]);
             require(success || !revertOnFail, _getRevertMsg(result));
             successes[i] = success;
             results[i] = result;
@@ -671,13 +776,39 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
     // *** EVENTS *** //
     // ************** //
 
-    event LogDeposit(IERC20 indexed token, address indexed from, address indexed to, uint256 amount, uint256 share);
-    event LogWithdraw(IERC20 indexed token, address indexed from, address indexed to, uint256 amount, uint256 share);
-    event LogTransfer(IERC20 indexed token, address indexed from, address indexed to, uint256 share);
+    event LogDeposit(
+        IERC20 indexed token,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        uint256 share
+    );
+    event LogWithdraw(
+        IERC20 indexed token,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        uint256 share
+    );
+    event LogTransfer(
+        IERC20 indexed token,
+        address indexed from,
+        address indexed to,
+        uint256 share
+    );
 
-    event LogFlashLoan(address indexed borrower, IERC20 indexed token, uint256 amount, uint256 feeAmount, address indexed receiver);
+    event LogFlashLoan(
+        address indexed borrower,
+        IERC20 indexed token,
+        uint256 amount,
+        uint256 feeAmount,
+        address indexed receiver
+    );
 
-    event LogStrategyTargetPercentage(IERC20 indexed token, uint256 targetPercentage);
+    event LogStrategyTargetPercentage(
+        IERC20 indexed token,
+        uint256 targetPercentage
+    );
     event LogStrategyQueued(IERC20 indexed token, IStrategy indexed strategy);
     event LogStrategySet(IERC20 indexed token, IStrategy indexed strategy);
     event LogStrategyInvest(IERC20 indexed token, uint256 amount);
@@ -747,7 +878,10 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
             // From is sender or you are skimming
             address masterContract = masterContractOf[msg.sender];
             require(masterContract != address(0), "Vault: no masterContract");
-            require(masterContractApproved[masterContract][from], "Vault: Transfer not approved");
+            require(
+                masterContractApproved[masterContract][from],
+                "Vault: Transfer not approved"
+            );
         }
         _;
     }
@@ -758,8 +892,14 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
     /// @dev Returns the total balance of `token` this contracts holds,
     /// plus the total amount this contract thinks the strategy holds.
-    function _tokenBalanceOf(IERC20 token) internal view returns (uint256 amount) {
-        amount = token.balanceOf(address(this)).add(strategyData[token].balance);
+    function _tokenBalanceOf(IERC20 token)
+        internal
+        view
+        returns (uint256 amount)
+    {
+        amount = token.balanceOf(address(this)).add(
+            strategyData[token].balance
+        );
     }
 
     // ************************ //
@@ -806,7 +946,12 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         address to,
         uint256 amount,
         uint256 share
-    ) public payable allowed(from) returns (uint256 amountOut, uint256 shareOut) {
+    )
+        public
+        payable
+        allowed(from)
+        returns (uint256 amountOut, uint256 shareOut)
+    {
         // Checks
         require(to != address(0), "Vault: to not set"); // To avoid a bad UI from burning funds
 
@@ -815,7 +960,10 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         Rebase memory total = totals[token];
 
         // If a new token gets added, the tokenSupply call checks that this is a deployed contract. Needed for security.
-        require(total.elastic != 0 || token.totalSupply() > 0, "Vault: No tokens");
+        require(
+            total.elastic != 0 || token.totalSupply() > 0,
+            "Vault: No tokens"
+        );
         if (share == 0) {
             // value of the share may be lower than the amount due to rounding, that's ok
             share = total.toBase(amount, false);
@@ -832,7 +980,9 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         // For ETH, the full balance is available, so no need to check.
         // During flashloans the _tokenBalanceOf is lower than 'reality', so skimming deposits will mostly fail during a flashloan.
         require(
-            from != address(this) || token_ == USE_ETHEREUM || amount <= _tokenBalanceOf(token).sub(total.elastic),
+            from != address(this) ||
+                token_ == USE_ETHEREUM ||
+                amount <= _tokenBalanceOf(token).sub(total.elastic),
             "Vault: Skim too much"
         );
 
@@ -888,7 +1038,10 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         total.elastic = total.elastic.sub(amount.to128());
         total.base = total.base.sub(share.to128());
         // There have to be at least 1000 shares left to prevent reseting the share/amount ratio (unless it's fully emptied)
-        require(total.base >= MINIMUM_SHARE_BALANCE || total.base == 0, "Vault: cannot empty");
+        require(
+            total.base >= MINIMUM_SHARE_BALANCE || total.base == 0,
+            "Vault: cannot empty"
+        );
         totals[token] = total;
 
         // Interactions
@@ -982,7 +1135,10 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
         borrower.onFlashLoan(msg.sender, token, amount, fee, data);
 
-        require(_tokenBalanceOf(token) >= totals[token].addElastic(fee.to128()), "Vault: Wrong amount");
+        require(
+            _tokenBalanceOf(token) >= totals[token].addElastic(fee.to128()),
+            "Vault: Wrong amount"
+        );
         emit LogFlashLoan(address(borrower), token, amount, fee, receiver);
     }
 
@@ -1017,8 +1173,18 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
         for (uint256 i = 0; i < len; i++) {
             IERC20 token = tokens[i];
-            require(_tokenBalanceOf(token) >= totals[token].addElastic(fees[i].to128()), "Vault: Wrong amount");
-            emit LogFlashLoan(address(borrower), token, amounts[i], fees[i], receivers[i]);
+            require(
+                _tokenBalanceOf(token) >=
+                    totals[token].addElastic(fees[i].to128()),
+                "Vault: Wrong amount"
+            );
+            emit LogFlashLoan(
+                address(borrower),
+                token,
+                amounts[i],
+                fees[i],
+                receivers[i]
+            );
         }
     }
 
@@ -1026,9 +1192,15 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
     /// @dev Only the owner of this contract is allowed to change this.
     /// @param token The address of the token that maps to a strategy to change.
     /// @param targetPercentage_ The new target in percent. Must be lesser or equal to `MAX_TARGET_PERCENTAGE`.
-    function setStrategyTargetPercentage(IERC20 token, uint64 targetPercentage_) public onlyOwner {
+    function setStrategyTargetPercentage(IERC20 token, uint64 targetPercentage_)
+        public
+        onlyOwner
+    {
         // Checks
-        require(targetPercentage_ <= MAX_TARGET_PERCENTAGE, "StrategyManager: Target too high");
+        require(
+            targetPercentage_ <= MAX_TARGET_PERCENTAGE,
+            "StrategyManager: Target too high"
+        );
 
         // Effects
         strategyData[token].targetPercentage = targetPercentage_;
@@ -1055,7 +1227,11 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
             data.strategyStartDate = (block.timestamp + STRATEGY_DELAY).to64();
             emit LogStrategyQueued(token, newStrategy);
         } else {
-            require(data.strategyStartDate != 0 && block.timestamp >= data.strategyStartDate, "StrategyManager: Too early");
+            require(
+                data.strategyStartDate != 0 &&
+                    block.timestamp >= data.strategyStartDate,
+                "StrategyManager: Too early"
+            );
             if (address(strategy[token]) != address(0)) {
                 int256 balanceChange = strategy[token].exit(data.balance);
                 // Effects
@@ -1120,7 +1296,8 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         }
 
         if (balance) {
-            uint256 targetBalance = totalElastic.mul(data.targetPercentage) / 100;
+            uint256 targetBalance =
+                totalElastic.mul(data.targetPercentage) / 100;
             // if data.balance == targetBalance there is nothing to update
             if (data.balance < targetBalance) {
                 uint256 amountOut = targetBalance.sub(data.balance);

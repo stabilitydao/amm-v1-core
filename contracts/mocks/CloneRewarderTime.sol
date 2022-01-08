@@ -8,11 +8,11 @@ import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 
 interface IReactMasterV2 {
-    function lpToken(uint256 pid) external view returns (IERC20 _lpToken); 
+    function lpToken(uint256 pid) external view returns (IERC20 _lpToken);
 }
 
 /// @author @0xKeno
-contract CloneRewarderTime is IRewarder,  BoringOwnable{
+contract CloneRewarderTime is IRewarder, BoringOwnable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;
@@ -34,11 +34,10 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     }
 
     /// @notice Mapping to track the rewarder pool.
-    mapping (uint256 => PoolInfo) public poolInfo;
-
+    mapping(uint256 => PoolInfo) public poolInfo;
 
     /// @notice Info of each user that stakes LP tokens.
-    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
 
     uint256 public rewardPerSecond;
     IERC20 public masterLpToken;
@@ -46,12 +45,27 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
 
     address public immutable REACTMASTER_V2;
 
-    event LogOnReward(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
-    event LogUpdatePool(uint256 indexed pid, uint64 lastRewardTime, uint256 lpSupply, uint256 accToken1PerShare);
+    event LogOnReward(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount,
+        address indexed to
+    );
+    event LogUpdatePool(
+        uint256 indexed pid,
+        uint64 lastRewardTime,
+        uint256 lpSupply,
+        uint256 accToken1PerShare
+    );
     event LogRewardPerSecond(uint256 rewardPerSecond);
-    event LogInit(IERC20 indexed rewardToken, address owner, uint256 rewardPerSecond, IERC20 indexed masterLpToken);
+    event LogInit(
+        IERC20 indexed rewardToken,
+        address owner,
+        uint256 rewardPerSecond,
+        IERC20 indexed masterLpToken
+    );
 
-    constructor (address _REACTMASTER_V2) public {
+    constructor(address _REACTMASTER_V2) public {
         REACTMASTER_V2 = _REACTMASTER_V2;
     }
 
@@ -59,30 +73,49 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     /// @dev `data` is abi encoded in the format: (IERC20 collateral, IERC20 asset, IOracle oracle, bytes oracleData)
     function init(bytes calldata data) public payable {
         require(rewardToken == IERC20(0), "Rewarder: already initialized");
-        (rewardToken, owner, rewardPerSecond, masterLpToken) = abi.decode(data, (IERC20, address, uint256, IERC20));
+        (rewardToken, owner, rewardPerSecond, masterLpToken) = abi.decode(
+            data,
+            (IERC20, address, uint256, IERC20)
+        );
         require(rewardToken != IERC20(0), "Rewarder: bad token");
         emit LogInit(rewardToken, owner, rewardPerSecond, masterLpToken);
     }
 
-    function onReactReward (uint256 pid, address _user, address to, uint256, uint256 lpTokenAmount) onlyRMV2 override external {
+    function onReactReward(
+        uint256 pid,
+        address _user,
+        address to,
+        uint256,
+        uint256 lpTokenAmount
+    ) external override onlyRMV2 {
         require(IReactMasterV2(REACTMASTER_V2).lpToken(pid) == masterLpToken);
 
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][_user];
         uint256 pending;
         if (user.amount > 0) {
-            pending =
-                (user.amount.mul(pool.accToken1PerShare) / ACC_TOKEN_PRECISION).sub(
-                    user.rewardDebt
-                );
+            pending = (user.amount.mul(pool.accToken1PerShare) /
+                ACC_TOKEN_PRECISION)
+                .sub(user.rewardDebt);
             rewardToken.safeTransfer(to, pending);
         }
         user.amount = lpTokenAmount;
-        user.rewardDebt = lpTokenAmount.mul(pool.accToken1PerShare) / ACC_TOKEN_PRECISION;
+        user.rewardDebt =
+            lpTokenAmount.mul(pool.accToken1PerShare) /
+            ACC_TOKEN_PRECISION;
         emit LogOnReward(_user, pid, pending, to);
     }
-    
-    function pendingTokens(uint256 pid, address user, uint256) override external view returns (IERC20[] memory rewardTokens, uint256[] memory rewardAmounts) {
+
+    function pendingTokens(
+        uint256 pid,
+        address user,
+        uint256
+    )
+        external
+        view
+        override
+        returns (IERC20[] memory rewardTokens, uint256[] memory rewardAmounts)
+    {
         IERC20[] memory _rewardTokens = new IERC20[](1);
         _rewardTokens[0] = (rewardToken);
         uint256[] memory _rewardAmounts = new uint256[](1);
@@ -115,17 +148,27 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending REACT reward for a given user.
-    function pendingToken(uint256 _pid, address _user) public view returns (uint256 pending) {
+    function pendingToken(uint256 _pid, address _user)
+        public
+        view
+        returns (uint256 pending)
+    {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accToken1PerShare = pool.accToken1PerShare;
-        uint256 lpSupply = IReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(REACTMASTER_V2);
+        uint256 lpSupply =
+            IReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(
+                REACTMASTER_V2
+            );
         if (block.timestamp > pool.lastRewardTime && lpSupply != 0) {
             uint256 time = block.timestamp.sub(pool.lastRewardTime);
             uint256 reactReward = time.mul(rewardPerSecond);
-            accToken1PerShare = accToken1PerShare.add(reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply);
+            accToken1PerShare = accToken1PerShare.add(
+                reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply
+            );
         }
-        pending = (user.amount.mul(accToken1PerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
+        pending = (user.amount.mul(accToken1PerShare) / ACC_TOKEN_PRECISION)
+            .sub(user.rewardDebt);
     }
 
     /// @notice Update reward variables of the given pool.
@@ -134,16 +177,26 @@ contract CloneRewarderTime is IRewarder,  BoringOwnable{
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
         pool = poolInfo[pid];
         if (block.timestamp > pool.lastRewardTime) {
-            uint256 lpSupply = IReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(REACTMASTER_V2);
+            uint256 lpSupply =
+                IReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(
+                    REACTMASTER_V2
+                );
 
             if (lpSupply > 0) {
                 uint256 time = block.timestamp.sub(pool.lastRewardTime);
                 uint256 reactReward = time.mul(rewardPerSecond);
-                pool.accToken1PerShare = pool.accToken1PerShare.add((reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128());
+                pool.accToken1PerShare = pool.accToken1PerShare.add(
+                    (reactReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128()
+                );
             }
             pool.lastRewardTime = block.timestamp.to64();
             poolInfo[pid] = pool;
-            emit LogUpdatePool(pid, pool.lastRewardTime, lpSupply, pool.accToken1PerShare);
+            emit LogUpdatePool(
+                pid,
+                pool.lastRewardTime,
+                lpSupply,
+                pool.accToken1PerShare
+            );
         }
     }
 }

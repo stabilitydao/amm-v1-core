@@ -1,9 +1,12 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
+import {ReactToken, ReactToken__factory} from "../types";
 
 describe("ReactToken", function () {
   before(async function () {
-    this.ReactToken = await ethers.getContractFactory("ReactToken")
+    this.ReactToken = (await ethers.getContractFactory(
+        'ReactToken'
+    )) as ReactToken__factory
     this.signers = await ethers.getSigners()
     this.alice = this.signers[0]
     this.bob = this.signers[1]
@@ -11,8 +14,12 @@ describe("ReactToken", function () {
   })
 
   beforeEach(async function () {
-    this.react = await this.ReactToken.deploy()
+    this.react = (await upgrades.deployProxy(this.ReactToken, {
+      kind: 'uups',
+    })) as ReactToken
+
     await this.react.deployed()
+    this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.alice.address)
   })
 
   it("should have correct name and symbol and decimal", async function () {
@@ -28,7 +35,7 @@ describe("ReactToken", function () {
     await this.react.mint(this.alice.address, "100")
     await this.react.mint(this.bob.address, "1000")
     await expect(this.react.connect(this.bob).mint(this.carol.address, "1000", { from: this.bob.address })).to.be.revertedWith(
-      "Ownable: caller is not the owner"
+      "is missing role"
     )
     const totalSupply = await this.react.totalSupply()
     const aliceBal = await this.react.balanceOf(this.alice.address)
