@@ -15,7 +15,7 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   const MINTER_ROLE = ethers.utils.id('MINTER_ROLE')
   let tx = await react.grantRole(MINTER_ROLE, address)
   process.stdout.write(
-      `Grant DividendToken MINTER_ROLE to DividendMinter (tx: ${tx.hash})...: `
+      `Grant ReactToken MINTER_ROLE to ReactMaster (tx: ${tx.hash})...: `
   )
 
   let receipt = await tx.wait()

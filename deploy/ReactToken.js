@@ -21,16 +21,10 @@ const { ethers, upgrades } = require('hardhat')
 
    let receipt = await react.deployTransaction.wait()
    console.log(
-       `ReactToken proxy deployed at: ${receipt.address} (block: ${
+       `ReactToken proxy deployed at: ${react.address} (block: ${
            receipt.blockNumber
        }) with ${receipt.gasUsed.toNumber()} gas`
    )
-
-/*  await deploy("ReactToken", {
-    from: deployer,
-    log: true,
-    deterministicDeployment: false
-  })*/
 }
 
 module.exports.tags = ["ReactToken"]

@@ -78,14 +78,14 @@ const config: HardhatUserConfig = {
       tags: ["test", "local"],
     },
     ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts,
       chainId: 3,
       live: true,
       saveDeployments: true,
       tags: ["staging"],
       gasPrice: 5000000000,
-      gasMultiplier: 2,
+      gasMultiplier: 4,
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
