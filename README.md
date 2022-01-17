@@ -1,4 +1,4 @@
-# ReactSwap
+# ReactSwap V0
 
 https://reactswap.com/
 
@@ -7,14 +7,15 @@ https://reactswap.com/
 DeX AMM with liquidity migration support, yield farms, staking pool and lending markets.
 
 Changes from SushiSwap contracts:
-* Modified token
+* REACT token
   * Role based access control
   * Flash minting
   * Upgradeable (UUPS-proxy)
 * No governance (manages by Stability DAO) 
 * Modern technology stack 
-  * OpenZeppelin 4.4
   * Solidity 0.8
+  * OpenZeppelin 4.4
+
 
 ## Deployed addresses
 

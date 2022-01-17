@@ -16,7 +16,7 @@ contract ReactRoll {
     IUniswapV2Router01 public oldRouter;
     IUniswapV2Router01 public router;
 
-    constructor(IUniswapV2Router01 _oldRouter, IUniswapV2Router01 _router) public {
+    constructor(IUniswapV2Router01 _oldRouter, IUniswapV2Router01 _router) {
         oldRouter = _oldRouter;
         router = _router;
     }

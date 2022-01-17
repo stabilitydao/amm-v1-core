@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-// P1 - P3: OK
-pragma solidity 0.6.12;
-import "./libraries/SafeMath.sol";
-import "./libraries/SafeERC20.sol";
+pragma solidity ^0.8.2;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./uniswapv2/interfaces/IUniswapV2ERC20.sol";
 import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
-
-import "./Ownable.sol";
 
 // ReactMaker is ReactMaster's left hand and kinda a wizard. He can cook up React from pretty much anything!
 // This contract handles "serving up" rewards for xReact holders by trading tokens collected from fees for React.
@@ -52,7 +50,7 @@ contract ReactMaker is Ownable {
         address _bar,
         address _react,
         address _weth
-    ) public {
+    ) {
         factory = IUniswapV2Factory(_factory);
         bar = _bar;
         react = _react;

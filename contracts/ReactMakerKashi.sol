@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
-import "./libraries/SafeMath.sol";
-import "./libraries/SafeERC20.sol";
+pragma solidity ^0.8.2;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
 
-import "./Ownable.sol";
 
 interface IVaultWithdraw {
     function withdraw(
@@ -63,7 +64,7 @@ contract ReactMakerKashi is Ownable {
         address _react,
         address _weth,
         bytes32 _pairCodeHash
-    ) public {
+    ) {
         factory = _factory;
         bar = _bar;
         vault = _vault;
@@ -144,8 +145,12 @@ contract ReactMakerKashi is Ownable {
         (address token0, address token1) = fromToken < toToken ? (fromToken, toToken) : (toToken, fromToken);
         IUniswapV2Pair pair =
             IUniswapV2Pair(
-                uint256(
-                    keccak256(abi.encodePacked(hex"ff", factory, keccak256(abi.encodePacked(token0, token1)), pairCodeHash))
+                address(
+                    uint160(
+                        uint256(
+                            keccak256(abi.encodePacked(hex"ff", factory, keccak256(abi.encodePacked(token0, token1)), pairCodeHash))
+                        )
+                    )
                 )
             );
         

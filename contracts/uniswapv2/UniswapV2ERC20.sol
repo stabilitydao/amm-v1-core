@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity =0.6.12;
+pragma solidity ^0.8.2;
 
 import "./libraries/SafeMath.sol";
 
 contract UniswapV2ERC20 {
     using SafeMathUniswap for uint256;
 
-    string public constant name = "ReactSwap LP Token";
-    string public constant symbol = "SLP";
+    string public constant name = "ReactSwap LP";
+    string public constant symbol = "RLP";
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
@@ -27,7 +27,7 @@ contract UniswapV2ERC20 {
     );
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    constructor() public {
+    constructor() {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -91,7 +91,7 @@ contract UniswapV2ERC20 {
         address to,
         uint256 value
     ) external returns (bool) {
-        if (allowance[from][msg.sender] != uint256(-1)) {
+        if (allowance[from][msg.sender] != type(uint256).max) {
             allowance[from][msg.sender] = allowance[from][msg.sender].sub(
                 value
             );

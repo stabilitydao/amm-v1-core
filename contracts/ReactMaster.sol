@@ -89,7 +89,7 @@ contract ReactMaster is Ownable {
         uint256 _reactPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock
-    ) public {
+    ) {
         react = _react;
         devaddr = _devaddr;
         reactPerBlock = _reactPerBlock;

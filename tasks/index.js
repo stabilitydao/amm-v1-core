@@ -1,6 +1,6 @@
 const { task } = require("hardhat/config")
 
-const { ethers: { constants: { MaxUint256 }}} = require("ethers")
+const { ethers: { constants: { MaxUint256 }}, BigNumber} = require("ethers")
 
 const fs = require("fs")
 
@@ -146,8 +146,9 @@ task("erc20:approve", "ERC20 approve")
   const erc20 = await ethers.getContractFactory("UniswapV2ERC20")
   
   const slp = erc20.attach(token)   
-  
-  await (await slp.connect(await getNamedSigner("dev")).approve(spender, deadline)).wait()    
+    deadline = MaxUint256
+
+  await (await slp.connect(await getNamedSigner("dev")).approve(spender, deadline)).wait()
 });
 
 task("factory:set-fee-to", "Factory set fee to")
@@ -186,9 +187,10 @@ task("router:add-liquidity-eth", "Router add liquidity eth")
 .addParam("to", "To")
 .addOptionalParam("deadline", MaxUint256)
 .setAction(async function ({ token, tokenDesired, tokenMinimum, ethMinimum, to, deadline }, { ethers: { getNamedSigner } }, runSuper) {
-  const router = await ethers.getContract("UniswapV2Router")
+  const router = await ethers.getContract("UniswapV2Router02")
   await run("erc20:approve", { token, spender: router.address })
-  await (await router.connect(await getNamedSigner("dev")).addLiquidityETH(token, tokenDesired, tokenMinimum, ethMinimum, to, deadline)).wait()    
+    deadline = MaxUint256
+  await (await router.connect(await getNamedSigner("dev")).addLiquidityETH(token, tokenDesired, tokenMinimum, ethMinimum, to, deadline, {value: ethMinimum})).wait()
 });
 
 task("migrate", "Migrates liquidity from Uniswap to ReactSwap")

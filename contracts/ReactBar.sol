@@ -14,7 +14,7 @@ contract ReactBar is ERC20("ReactBar", "xREACT"){
     IERC20 public react;
 
     // Define the React token contract
-    constructor(IERC20 _react) public {
+    constructor(IERC20 _react) {
         react = _react;
     }
 

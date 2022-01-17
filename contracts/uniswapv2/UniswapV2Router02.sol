@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.6.12;
+pragma solidity ^0.8.2;
 
 import "./libraries/UniswapV2Library.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -23,7 +23,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         _;
     }
 
-    constructor(address _factory, address _WETH) public {
+    constructor(address _factory, address _WETH) {
         factory = _factory;
         WETH = _WETH;
     }

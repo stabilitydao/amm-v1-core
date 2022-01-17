@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity =0.6.12;
+pragma solidity ^0.8.2;
 
 import "./UniswapV2ERC20.sol";
 import "./libraries/Math.sol";
@@ -86,7 +86,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     );
     event Sync(uint112 reserve0, uint112 reserve1);
 
-    constructor() public {
+    constructor() {
         factory = msg.sender;
     }
 
@@ -105,7 +105,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint112 _reserve1
     ) private {
         require(
-            balance0 <= uint112(-1) && balance1 <= uint112(-1),
+            balance0 <= type(uint112).max && balance1 <= type(uint112).max,
             "UniswapV2: OVERFLOW"
         );
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
@@ -164,7 +164,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
             if (msg.sender == migrator) {
                 liquidity = IMigrator(migrator).desiredLiquidity();
                 require(
-                    liquidity > 0 && liquidity != uint256(-1),
+                    liquidity > 0 && liquidity != type(uint256).max,
                     "Bad desired liquidity"
                 );
             } else {
