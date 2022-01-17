@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.2;
 
-import "../uniswapv2/UniswapV2Factory.sol";
+import "../amm/Factory.sol";
 
-contract ReactSwapFactoryMock is UniswapV2Factory {
-    constructor(address _feeToSetter) UniswapV2Factory(_feeToSetter) {}
+contract ReactSwapFactoryMock is Factory {
+    constructor(address _feeToSetter) Factory(_feeToSetter) {}
 }

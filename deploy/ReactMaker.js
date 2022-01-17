@@ -7,7 +7,7 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
 
   const chainId = await getChainId()
 
-  const factory = await ethers.getContract("UniswapV2Factory")
+  const factory = await ethers.getContract("Factory")
   const bar = await ethers.getContract("ReactBar")
   const react = await ethers.getContract("ReactToken")
   
@@ -36,4 +36,4 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
 }
 
 module.exports.tags = ["ReactMaker"]
-module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "ReactBar", "ReactToken"]
+module.exports.dependencies = ["ReactFactory", "UniswapV2Router02", "ReactBar", "ReactToken"]

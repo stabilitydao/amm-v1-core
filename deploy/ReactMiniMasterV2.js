@@ -37,5 +37,4 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
 }
 
 module.exports.tags = ["ReactMiniMasterV2"]
-// module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02"]
 module.exports.dependencies = ["ReactToken"]

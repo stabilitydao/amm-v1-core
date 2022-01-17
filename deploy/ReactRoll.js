@@ -14,7 +14,7 @@ module.exports = async function ({ getNamedAccounts, getChainId, deployments }) 
 
   const chainId = await getChainId()
 
-  const reactswapRouterAddress = (await deployments.get("UniswapV2Router02")).address
+  const reactswapRouterAddress = (await deployments.get("Router")).address
 
   UNISWAP_ROUTER.set("31337", reactswapRouterAddress)
 
@@ -35,4 +35,4 @@ module.exports = async function ({ getNamedAccounts, getChainId, deployments }) 
 }
 
 module.exports.tags = ["ReactRoll"]
-module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02"]
+module.exports.dependencies = ["Factory", "Router"]

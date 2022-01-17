@@ -5,9 +5,9 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./uniswapv2/interfaces/IUniswapV2ERC20.sol";
-import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
-import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
+import "./amm/interfaces/IUniswapV2ERC20.sol";
+import "./amm/interfaces/IUniswapV2Pair.sol";
+import "./amm/interfaces/IUniswapV2Factory.sol";
 
 // ReactMaker is ReactMaster's left hand and kinda a wizard. He can cook up React from pretty much anything!
 // This contract handles "serving up" rewards for xReact holders by trading tokens collected from fees for React.

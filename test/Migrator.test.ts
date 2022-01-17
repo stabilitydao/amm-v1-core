@@ -10,8 +10,8 @@ describe("Migrator", function () {
     this.dev = this.signers[2]
     this.minter = this.signers[3]
 
-    this.UniswapV2Factory = await ethers.getContractFactory("UniswapV2Factory")
-    this.UniswapV2Pair = await ethers.getContractFactory("UniswapV2Pair")
+    this.UniswapV2Factory = await ethers.getContractFactory("Factory")
+    this.UniswapV2Pair = await ethers.getContractFactory("Pair")
     this.ERC20Mock = await ethers.getContractFactory("ERC20Mock", this.minter)
     this.ReactToken = (await ethers.getContractFactory(
         'ReactToken'

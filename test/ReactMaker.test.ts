@@ -3,7 +3,7 @@ import { prepare, deploy, getBigNumber, createSLP } from "./utilities"
 
 describe("ReactMaker", function () {
   before(async function () {
-    await prepare(this, ["ReactMaker", "ReactBar", "ReactMakerExploitMock", "ERC20Mock", "UniswapV2Factory", "UniswapV2Pair"])
+    await prepare(this, ["ReactMaker", "ReactBar", "ReactMakerExploitMock", "ERC20Mock", "Factory", "Pair"])
   })
 
   beforeEach(async function () {
@@ -14,7 +14,7 @@ describe("ReactMaker", function () {
       ["usdc", this.ERC20Mock, ["USDC", "USDC", getBigNumber("10000000")]],
       ["weth", this.ERC20Mock, ["WETH", "ETH", getBigNumber("10000000")]],
       ["strudel", this.ERC20Mock, ["$TRDL", "$TRDL", getBigNumber("10000000")]],
-      ["factory", this.UniswapV2Factory, [this.alice.address]],
+      ["factory", this.Factory, [this.alice.address]],
     ])
     await deploy(this, [["bar", this.ReactBar, [this.react.address]]])
     await deploy(this, [["reactMaker", this.ReactMaker, [this.factory.address, this.bar.address, this.react.address, this.weth.address]]])

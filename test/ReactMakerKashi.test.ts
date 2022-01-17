@@ -5,7 +5,7 @@ import { prepare, deploy, getBigNumber, createSLP } from "./utilities"
 
 describe("KashiReactMaker", function () {
   before(async function () {
-    await prepare(this, ["ReactMakerKashi", "ReactBar", "ReactMakerKashiExploitMock", "ERC20Mock", "UniswapV2Factory", "UniswapV2Pair", "VaultV1", "BankerPairMediumRiskV1", "PeggedOracleV1"])
+    await prepare(this, ["ReactMakerKashi", "ReactBar", "ReactMakerKashiExploitMock", "ERC20Mock", "Factory", "Pair", "VaultV1", "BankerPairMediumRiskV1", "PeggedOracleV1"])
   })
 
   beforeEach(async function () {
@@ -17,7 +17,7 @@ describe("KashiReactMaker", function () {
       ["usdc", this.ERC20Mock, ["USDC", "USDC", getBigNumber("10000000")]],
       ["weth", this.ERC20Mock, ["WETH", "ETH", getBigNumber("10000000")]],
       ["strudel", this.ERC20Mock, ["$TRDL", "$TRDL", getBigNumber("10000000")]],
-      ["factory", this.UniswapV2Factory, [this.alice.address]],
+      ["factory", this.Factory, [this.alice.address]],
     ])
     // Deploy React and Kashi contracts
     await deploy(this, [["bar", this.ReactBar, [this.react.address]]])

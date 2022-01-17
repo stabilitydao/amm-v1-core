@@ -4,7 +4,7 @@ pragma solidity ^0.8.2;
 
 import "./libraries/SafeMath.sol";
 
-contract UniswapV2ERC20 {
+contract LP {
     using SafeMathUniswap for uint256;
 
     string public constant name = "ReactSwap LP";
@@ -20,11 +20,7 @@ contract UniswapV2ERC20 {
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
     mapping(address => uint256) public nonces;
 
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     constructor() {
@@ -57,20 +53,12 @@ contract UniswapV2ERC20 {
         emit Transfer(from, address(0), value);
     }
 
-    function _approve(
-        address owner,
-        address spender,
-        uint256 value
-    ) private {
+    function _approve(address owner, address spender, uint256 value) private {
         allowance[owner][spender] = value;
         emit Approval(owner, spender, value);
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) private {
+    function _transfer(address from, address to, uint256 value) private {
         balanceOf[from] = balanceOf[from].sub(value);
         balanceOf[to] = balanceOf[to].add(value);
         emit Transfer(from, to, value);
@@ -100,16 +88,8 @@ contract UniswapV2ERC20 {
         return true;
     }
 
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
-        require(deadline >= block.timestamp, "UniswapV2: EXPIRED");
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        require(deadline >= block.timestamp, "RLP: EXPIRED");
         bytes32 digest =
             keccak256(
                 abi.encodePacked(
@@ -130,7 +110,7 @@ contract UniswapV2ERC20 {
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(
             recoveredAddress != address(0) && recoveredAddress == owner,
-            "UniswapV2: INVALID_SIGNATURE"
+            "RLP: INVALID_SIGNATURE"
         );
         _approve(owner, spender, value);
     }

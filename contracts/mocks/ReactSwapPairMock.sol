@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.2;
 
-import "../uniswapv2/UniswapV2Pair.sol";
+import "../amm/Pair.sol";
 
-contract ReactSwapPairMock is UniswapV2Pair {
-    constructor() UniswapV2Pair() {}
+contract ReactSwapPairMock is Pair {
+    constructor() Pair() {}
 }
