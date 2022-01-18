@@ -5,7 +5,7 @@ import { prepare, deploy, getBigNumber, createSLP } from "./utilities"
 
 describe("KashiReactMaker", function () {
   before(async function () {
-    await prepare(this, ["ReactMakerKashi", "ReactBar", "ReactMakerKashiExploitMock", "ERC20Mock", "Factory", "Pair", "VaultV1", "BankerPairMediumRiskV1", "PeggedOracleV1"])
+    await prepare(this, ["XLendFees", "XStakeBar", "ReactMakerKashiExploitMock", "ERC20Mock", "Factory", "Pair", "VaultV1", "BankerPairMediumRiskV1", "PeggedOracleV1"])
   })
 
   beforeEach(async function () {
@@ -20,10 +20,10 @@ describe("KashiReactMaker", function () {
       ["factory", this.Factory, [this.alice.address]],
     ])
     // Deploy React and Kashi contracts
-    await deploy(this, [["bar", this.ReactBar, [this.react.address]]])
+    await deploy(this, [["bar", this.XStakeBar, [this.react.address]]])
     await deploy(this, [["vault", this.VaultV1, [this.weth.address]]])
     await deploy(this, [["banker", this.BankerPairMediumRiskV1, [this.vault.address]]])
-    await deploy(this, [["reactMaker", this.ReactMakerKashi, [this.factory.address, this.bar.address, this.vault.address, this.react.address, this.weth.address, this.factory.pairCodeHash()]]])
+    await deploy(this, [["reactMaker", this.XLendFees, [this.factory.address, this.bar.address, this.vault.address, this.react.address, this.weth.address, this.factory.pairCodeHash()]]])
     await deploy(this, [["exploiter", this.ReactMakerKashiExploitMock, [this.reactMaker.address]]])
     await deploy(this, [["oracle", this.PeggedOracleV1]])
     // Create SLPs

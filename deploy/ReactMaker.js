@@ -8,7 +8,7 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
   const chainId = await getChainId()
 
   const factory = await ethers.getContract("Factory")
-  const bar = await ethers.getContract("ReactBar")
+  const bar = await ethers.getContract("XStakeBar")
   const react = await ethers.getContract("ReactToken")
   
   let wethAddress;
@@ -21,19 +21,19 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
     throw Error("No WETH!")
   }
 
-  await deploy("ReactMaker", {
+  await deploy("XSwapFees", {
     from: deployer,
     args: [factory.address, bar.address, react.address, wethAddress],
     log: true,
     deterministicDeployment: false
   })
 
-  const maker = await ethers.getContract("ReactMaker")
+  const maker = await ethers.getContract("XSwapFees")
   if (await maker.owner() !== dev) {
     console.log("Setting maker owner")
     await (await maker.transferOwnership(dev, true, false)).wait()
   }
 }
 
-module.exports.tags = ["ReactMaker"]
-module.exports.dependencies = ["ReactFactory", "UniswapV2Router02", "ReactBar", "ReactToken"]
+module.exports.tags = ["XSwapFees"]
+module.exports.dependencies = ["Factory", "Router", "XStakeBar", "ReactToken"]

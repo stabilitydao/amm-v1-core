@@ -3,7 +3,7 @@ import { prepare, deploy, getBigNumber, createSLP } from "./utilities"
 
 describe("ReactMaker", function () {
   before(async function () {
-    await prepare(this, ["ReactMaker", "ReactBar", "ReactMakerExploitMock", "ERC20Mock", "Factory", "Pair"])
+    await prepare(this, ["XSwapFees", "XStakeBar", "ReactMakerExploitMock", "ERC20Mock", "Factory", "Pair"])
   })
 
   beforeEach(async function () {
@@ -16,8 +16,8 @@ describe("ReactMaker", function () {
       ["strudel", this.ERC20Mock, ["$TRDL", "$TRDL", getBigNumber("10000000")]],
       ["factory", this.Factory, [this.alice.address]],
     ])
-    await deploy(this, [["bar", this.ReactBar, [this.react.address]]])
-    await deploy(this, [["reactMaker", this.ReactMaker, [this.factory.address, this.bar.address, this.react.address, this.weth.address]]])
+    await deploy(this, [["bar", this.XStakeBar, [this.react.address]]])
+    await deploy(this, [["reactMaker", this.XSwapFees, [this.factory.address, this.bar.address, this.react.address, this.weth.address]]])
     await deploy(this, [["exploiter", this.ReactMakerExploitMock, [this.reactMaker.address]]])
     await createSLP(this, "reactEth", this.react, this.weth, getBigNumber(10))
     await createSLP(this, "strudelEth", this.strudel, this.weth, getBigNumber(10))

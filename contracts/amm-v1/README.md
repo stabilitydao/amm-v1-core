@@ -1,4 +1,6 @@
-## Uniswap V2 AMM
+## ReactSwap AMM V1
+
+Based on Uniswap V2 with liquidity migration features by SushiSwap.
 
 Code from [Uniswap V2](https://github.com/Uniswap/uniswap-v2-core/tree/27f6354bae6685612c182c3bc7577e61bc8717e3/contracts) with the following modifications.
 

@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.2;
 
-import "./amm/interfaces/IUniswapV2Pair.sol";
-import "./amm/interfaces/IUniswapV2Factory.sol";
+import "./interfaces/IUniswapV2Pair.sol";
+import "./interfaces/IUniswapV2Factory.sol";
 
 
 contract Migrator {

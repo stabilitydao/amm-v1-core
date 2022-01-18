@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-// ReactBar is the coolest bar in town. You come in with some React, and leave with more! The longer you stay, the more React you get.
+// X-Stake Bar is the coolest bar in town. You come in with some React, and leave with more! The longer you stay, the more React you get.
 //
 // This contract handles swapping to and from xReact, ReactSwap's staking token.
-contract ReactBar is ERC20("ReactBar", "xREACT"){
+contract XStakeBar is ERC20("X-Stake Bar", "XREACT") {
     using SafeMath for uint256;
     IERC20 public react;
 

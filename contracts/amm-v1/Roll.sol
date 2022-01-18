@@ -4,13 +4,13 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./amm/interfaces/IUniswapV2Pair.sol";
-import "./amm/interfaces/IUniswapV2Router01.sol";
-import "./amm/interfaces/IUniswapV2Factory.sol";
-import "./amm/libraries/UniswapV2Library.sol";
+import "./interfaces/IUniswapV2Pair.sol";
+import "./interfaces/IUniswapV2Router01.sol";
+import "./interfaces/IUniswapV2Factory.sol";
+import "./libraries/UniswapV2Library.sol";
 
-// ReactRoll helps your migrate your existing Uniswap LP tokens to ReactSwap LP ones
-contract ReactRoll {
+// Roll helps your migrate your existing Uniswap LP tokens to ReactSwap LP ones
+contract Roll {
     using SafeERC20 for IERC20;
 
     IUniswapV2Router01 public oldRouter;

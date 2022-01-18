@@ -10,14 +10,14 @@ analyze:
     remappings:
         - "@openzeppelin=node_modules/@openzeppelin"
     targets:
-        - contracts/ReactMaker.sol:ReactMaker
-        - contracts/amm/Pair.sol:UniswapV2Pair
-        - contracts/amm/Factory.sol:UniswapV2Factory
-        - contracts/amm/LP.sol:UniswapV2ERC20
-        - contracts/amm/Router.sol:UniswapV2Router02
-        - contracts/ReactRoll.sol:ReactRoll
+        - contracts/XSwapFees.sol:ReactMaker
+        - contracts/amm-v1/Pair.sol:UniswapV2Pair
+        - contracts/amm-v1/Factory.sol:UniswapV2Factory
+        - contracts/amm-v1/LP.sol:UniswapV2ERC20
+        - contracts/amm-v1/Router.sol:UniswapV2Router02
+        - contracts/Roll.sol:ReactRoll
         - contracts/ReactToken.sol:ReactToken
-        - contracts/ReactBar.sol:ReactBar
+        - contracts/XStakeBar.sol:ReactBar
         - contracts/ReactMaster.sol:ReactMaster
         - contracts/governance/Timelock.sol:Timelock
         - contracts/Migrator.sol:Migrator

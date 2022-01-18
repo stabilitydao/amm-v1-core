@@ -9,7 +9,7 @@ describe("ReactBar", function () {
         'ReactToken'
     )) as ReactToken__factory
 
-    this.ReactBar = await ethers.getContractFactory("ReactBar")
+    this.ReactBar = await ethers.getContractFactory("XStakeBar")
 
     this.signers = await ethers.getSigners()
     this.alice = this.signers[0]

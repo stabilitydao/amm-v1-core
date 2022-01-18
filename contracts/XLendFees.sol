@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./amm/interfaces/IUniswapV2Pair.sol";
-import "./amm/interfaces/IUniswapV2Factory.sol";
+import "./amm-v1/interfaces/IUniswapV2Pair.sol";
+import "./amm-v1/interfaces/IUniswapV2Factory.sol";
 
 
 interface IVaultWithdraw {
@@ -27,9 +27,8 @@ interface IKashiWithdrawFee {
     function removeAsset(address to, uint256 fraction) external returns (uint256 share);
 }
 
-// ReactMakerKashi is ReactMaster's left hand and kinda a wizard. He can cook up React from pretty much anything!
-// This contract handles "serving up" rewards for xReact holders by trading tokens collected from Kashi fees for React.
-contract ReactMakerKashi is Ownable {
+// XLendFees contract handles "serving up" rewards for XREACT holders by trading tokens collected from Kashi fees for REACT.
+contract XLendFees is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 

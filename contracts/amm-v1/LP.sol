@@ -7,7 +7,7 @@ import "./libraries/SafeMath.sol";
 contract LP {
     using SafeMathUniswap for uint256;
 
-    string public constant name = "ReactSwap LP";
+    string public constant name = "ReactSwap Liquidity Provider";
     string public constant symbol = "RLP";
     uint8 public constant decimals = 18;
     uint256 public totalSupply;

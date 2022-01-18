@@ -24,9 +24,7 @@ module.exports = async function ({ getNamedAccounts, getChainId, deployments }) 
 
   const uniswapRouterAddress = UNISWAP_ROUTER.get(chainId)
 
-
-
-  await deploy("ReactRoll", {
+  await deploy("Roll", {
     from: deployer,
     args: [uniswapRouterAddress, reactswapRouterAddress],
     log: true,
@@ -34,5 +32,5 @@ module.exports = async function ({ getNamedAccounts, getChainId, deployments }) 
   })
 }
 
-module.exports.tags = ["ReactRoll"]
+module.exports.tags = ["Roll"]
 module.exports.dependencies = ["Factory", "Router"]

@@ -5,30 +5,28 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./amm/interfaces/IUniswapV2ERC20.sol";
-import "./amm/interfaces/IUniswapV2Pair.sol";
-import "./amm/interfaces/IUniswapV2Factory.sol";
+import "./amm-v1/interfaces/IUniswapV2ERC20.sol";
+import "./amm-v1/interfaces/IUniswapV2Pair.sol";
+import "./amm-v1/interfaces/IUniswapV2Factory.sol";
 
-// ReactMaker is ReactMaster's left hand and kinda a wizard. He can cook up React from pretty much anything!
-// This contract handles "serving up" rewards for xReact holders by trading tokens collected from fees for React.
+// XSwapFees contract handles "serving up" rewards for xReact holders by trading tokens collected from fees for React.
 
 // T1 - T4: OK
-contract ReactMaker is Ownable {
+contract XSwapFees is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     // V1 - V5: OK
     IUniswapV2Factory public immutable factory;
-    //0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
+
     // V1 - V5: OK
     address public immutable bar;
-    //0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272
+
     // V1 - V5: OK
     address private immutable react;
-    //0x6B3595068778DD592e39A122f4f5a5cF09C90fE2
+
     // V1 - V5: OK
     address private immutable weth;
-    //0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
 
     // V1 - V5: OK
     mapping(address => address) internal _bridges;
