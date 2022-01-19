@@ -6,7 +6,7 @@ import "../interfaces/IRewarder.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringERC20.sol";
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
-import "../ReactMasterV2.sol";
+import "../pantry/MasterChefV2.sol";
 
 /// @author @0xKeno
 contract ComplexRewarder is IRewarder, BoringOwnable {
@@ -169,7 +169,7 @@ contract ComplexRewarder is IRewarder, BoringOwnable {
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accReactPerShare = pool.accReactPerShare;
         uint256 lpSupply =
-            ReactMasterV2(REACTMASTER_V2).lpToken(_pid).balanceOf(
+            MasterChefV2(REACTMASTER_V2).lpToken(_pid).balanceOf(
                 REACTMASTER_V2
             );
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
@@ -203,7 +203,7 @@ contract ComplexRewarder is IRewarder, BoringOwnable {
         require(pool.lastRewardBlock != 0, "Pool does not exist");
         if (block.number > pool.lastRewardBlock) {
             uint256 lpSupply =
-                ReactMasterV2(REACTMASTER_V2).lpToken(pid).balanceOf(
+                MasterChefV2(REACTMASTER_V2).lpToken(pid).balanceOf(
                     REACTMASTER_V2
                 );
 

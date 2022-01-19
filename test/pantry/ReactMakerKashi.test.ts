@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
 const { keccak256, defaultAbiCoder } = require("ethers");
 import { expect } from "chai";
-import { prepare, deploy, getBigNumber, createSLP } from "./utilities"
+import { prepare, deploy, getBigNumber, createSLP } from "../utilities"
 
 describe("KashiReactMaker", function () {
   before(async function () {
-    await prepare(this, ["XLendFees", "XStakeBar", "ReactMakerKashiExploitMock", "ERC20Mock", "Factory", "Pair", "VaultV1", "BankerPairMediumRiskV1", "PeggedOracleV1"])
+    await prepare(this, ["XLendFees", "XStakeBar", "ReactMakerKashiExploitMock", "ERC20Mock", "Factory", "Pair", "BentoBoxV1", "KashiPairMediumRiskV1", "PeggedOracleV1"])
   })
 
   beforeEach(async function () {
@@ -21,8 +21,8 @@ describe("KashiReactMaker", function () {
     ])
     // Deploy React and Kashi contracts
     await deploy(this, [["bar", this.XStakeBar, [this.react.address]]])
-    await deploy(this, [["vault", this.VaultV1, [this.weth.address]]])
-    await deploy(this, [["banker", this.BankerPairMediumRiskV1, [this.vault.address]]])
+    await deploy(this, [["vault", this.BentoBoxV1, [this.weth.address]]])
+    await deploy(this, [["banker", this.KashiPairMediumRiskV1, [this.vault.address]]])
     await deploy(this, [["reactMaker", this.XLendFees, [this.factory.address, this.bar.address, this.vault.address, this.react.address, this.weth.address, this.factory.pairCodeHash()]]])
     await deploy(this, [["exploiter", this.ReactMakerKashiExploitMock, [this.reactMaker.address]]])
     await deploy(this, [["oracle", this.PeggedOracleV1]])

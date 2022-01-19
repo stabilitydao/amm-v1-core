@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-// The Vault
+// The pantry
 
 //  ▄▄▄▄· ▄▄▄ . ▐ ▄ ▄▄▄▄▄      ▄▄▄▄·       ▐▄• ▄
 //  ▐█ ▀█▪▀▄.▀·█▌▐█•██  ▪     ▐█ ▀█▪▪      █▌█▌▪
@@ -597,7 +597,7 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
                 : _calculateDomainSeparator(chainId);
     }
 
-    /// @notice Other contracts need to register with this master contract so that users can approve them for the Vault.
+    /// @notice Other contracts need to register with this master contract so that users can approve them for the pantry.
     function registerProtocol() public {
         masterContractOf[msg.sender] = msg.sender;
         emit LogRegisterProtocol(msg.sender);
@@ -757,16 +757,16 @@ contract BoringBatchable is BaseBoringBatchable {
     }
 }
 
-// File contracts/VaultV1.sol
+// File contracts/BentoBoxV1.sol
 // License-Identifier: UNLICENSED
 
-/// @title Vault
+/// @title pantry
 /// @author BoringCrypto, Keno
 /// @notice This is a vault for tokens. The stored tokens can be flash loaned and used in strategies.
 /// Yield from this will go to the token depositors.
 /// Rebasing tokens ARE NOT supported and WILL cause loss of funds.
-/// Any funds transfered directly onto the Vault will be lost, use the deposit function instead.
-contract VaultV1 is MasterContractManager, BoringBatchable {
+/// Any funds transfered directly onto the pantry will be lost, use the deposit function instead.
+contract BentoBoxV1 is MasterContractManager, BoringBatchable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;
@@ -823,7 +823,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
     struct StrategyData {
         uint64 strategyStartDate;
         uint64 targetPercentage;
-        uint128 balance; // the balance of the strategy that Vault thinks is in there
+        uint128 balance; // the balance of the strategy that pantry thinks is in there
     }
 
     // ******************************** //
@@ -869,7 +869,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
 
     /// Modifier to check if the msg.sender is allowed to use funds belonging to the 'from' address.
     /// If 'from' is msg.sender, it's allowed.
-    /// If 'from' is the Vault itself, it's allowed. Any ETH, token balances (above the known balances) or Vault balances
+    /// If 'from' is the pantry itself, it's allowed. Any ETH, token balances (above the known balances) or pantry balances
     /// can be taken by anyone.
     /// This is to enable skimming, not just for deposits, but also for withdrawals or transfers, enabling better composability.
     /// If 'from' is a clone of a masterContract AND the 'from' address has approved that masterContract, it's allowed.
@@ -1264,7 +1264,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
     /// @param maxChangeAmount The maximum amount for either pulling or pushing from/to the `IStrategy` contract.
     // F5 - Checks-Effects-Interactions pattern followed? (SWC-107)
     // F5: Total amount is updated AFTER interaction. But strategy is under our control.
-    // F5: Not followed to prevent reentrancy issues with flashloans and Vault skims?
+    // F5: Not followed to prevent reentrancy issues with flashloans and pantry skims?
     function harvest(
         IERC20 token,
         bool balance,
@@ -1287,7 +1287,7 @@ contract VaultV1 is MasterContractManager, BoringBatchable {
         } else if (balanceChange < 0) {
             // C1 - All math done through BoringMath (SWC-101)
             // C1: balanceChange could overflow if it's max negative int128.
-            // But tokens with balances that large are not supported by the Vault.
+            // But tokens with balances that large are not supported by the pantry.
             uint256 sub = uint256(-balanceChange);
             totalElastic = totalElastic.sub(sub);
             totals[token].elastic = totalElastic.to128();

@@ -22,14 +22,14 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   //   throw Error("No REACT!")
   // }
 
-  await deploy("ReactMiniMasterV2", {
+  await deploy("MiniChefV2", {
     from: deployer,
     args: [reactAddress],
     log: true,
     deterministicDeployment: false
   })
 
-  const reactMiniMasterV2 = await ethers.getContract("ReactMiniMasterV2")
+  const reactMiniMasterV2 = await ethers.getContract("MiniChefV2")
   if (await reactMiniMasterV2.owner() !== dev) {
     console.log("Transfer ownership of ReactMiniMasterV2 to dev")
     await (await reactMiniMasterV2.transferOwnership(dev, true, false)).wait()

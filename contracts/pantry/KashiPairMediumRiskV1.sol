@@ -145,7 +145,7 @@ contract BoringOwnable is BoringOwnableData {
 // File @boringcrypto/boring-solidity/contracts/Domain.sol@v1.2.0
 // License-Identifier: MIT
 // Based on code and smartness by Ross Campbell and Keno
-// Uses immutable to store the domain separator to reduce gas usage
+// Uses immutable to pantry the domain separator to reduce gas usage
 // If the chain id changes due to a fork, the forked chain will calculate on the fly.
 
 contract Domain {
@@ -854,11 +854,11 @@ interface IOracle {
 // License-Identifier: MIT
 
 interface ISwapper {
-    /// @notice Withdraws 'amountFrom' of token 'from' from the Vault account for this swapper.
+    /// @notice Withdraws 'amountFrom' of token 'from' from the pantry account for this swapper.
     /// Swaps it for at least 'amountToMin' of token 'to'.
-    /// Transfers the swapped tokens of 'to' into the Vault using a plain ERC20 transfer.
-    /// Returns the amount of tokens 'to' transferred to Vault.
-    /// (The Vault skim function will be used by the caller to get the swapped funds).
+    /// Transfers the swapped tokens of 'to' into the pantry using a plain ERC20 transfer.
+    /// Returns the amount of tokens 'to' transferred to pantry.
+    /// (The pantry skim function will be used by the caller to get the swapped funds).
     function swap(
         IERC20 fromToken,
         IERC20 toToken,
@@ -869,12 +869,12 @@ interface ISwapper {
 
     /// @notice Calculates the amount of token 'from' needed to complete the swap (amountFrom),
     /// this should be less than or equal to amountFromMax.
-    /// Withdraws 'amountFrom' of token 'from' from the Vault account for this swapper.
+    /// Withdraws 'amountFrom' of token 'from' from the pantry account for this swapper.
     /// Swaps it for exactly 'exactAmountTo' of token 'to'.
-    /// Transfers the swapped tokens of 'to' into the Vault using a plain ERC20 transfer.
-    /// Transfers allocated, but unused 'from' tokens within the Vault to 'refundTo' (amountFromMax - amountFrom).
-    /// Returns the amount of 'from' tokens withdrawn from Vault (amountFrom).
-    /// (The Vault skim function will be used by the caller to get the swapped funds).
+    /// Transfers the swapped tokens of 'to' into the pantry using a plain ERC20 transfer.
+    /// Transfers allocated, but unused 'from' tokens within the pantry to 'refundTo' (amountFromMax - amountFrom).
+    /// Returns the amount of 'from' tokens withdrawn from pantry (amountFrom).
+    /// (The pantry skim function will be used by the caller to get the swapped funds).
     function swapExact(
         IERC20 fromToken,
         IERC20 toToken,
@@ -890,9 +890,9 @@ interface ISwapper {
 // Banker Medium Risk
 
 /// @title BankerPair
-/// @dev This contract allows contract calls to any contract (except Vault)
+/// @dev This contract allows contract calls to any contract (except pantry)
 /// from arbitrary callers thus, don't trust calls from this contract in any circumstances.
-contract BankerPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
+contract KashiPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using RebaseLibrary for Rebase;
@@ -945,7 +945,7 @@ contract BankerPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
     // Immutables (for MasterContract and all clones)
     IVaultV1 public immutable vault;
-    BankerPairMediumRiskV1 public immutable masterContract;
+    KashiPairMediumRiskV1 public immutable masterContract;
 
     // MasterContract variables
     address public feeTo;
@@ -960,7 +960,7 @@ contract BankerPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
     // Total amounts
     uint256 public totalCollateralShare; // Total collateral supplied
-    Rebase public totalAsset; // elastic = Vault shares held by the BankerPair, base = Total fractions held by asset suppliers
+    Rebase public totalAsset; // elastic = pantry shares held by the BankerPair, base = Total fractions held by asset suppliers
     Rebase public totalBorrow; // elastic = Total token amount to be repayed by borrowers, base = Total parts of the debt held by borrowers
 
     // User balances
@@ -1433,14 +1433,14 @@ contract BankerPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     uint8 internal constant ACTION_ADD_COLLATERAL = 10;
     uint8 internal constant ACTION_UPDATE_EXCHANGE_RATE = 11;
 
-    // Function on Vault
+    // Function on pantry
     uint8 internal constant ACTION_BENTO_DEPOSIT = 20;
     uint8 internal constant ACTION_BENTO_WITHDRAW = 21;
     uint8 internal constant ACTION_BENTO_TRANSFER = 22;
     uint8 internal constant ACTION_BENTO_TRANSFER_MULTIPLE = 23;
     uint8 internal constant ACTION_BENTO_SETAPPROVAL = 24;
 
-    // Any external call (except to Vault)
+    // Any external call (except to pantry)
     uint8 internal constant ACTION_CALL = 30;
 
     int256 internal constant USE_VALUE1 = -1;

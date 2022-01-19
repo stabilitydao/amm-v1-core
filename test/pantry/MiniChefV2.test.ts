@@ -1,16 +1,16 @@
 import { expect, assert } from "chai";
-import { advanceTime, advanceTimeAndBlock, advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZERO } from "./utilities"
+import { advanceTime, advanceTimeAndBlock, advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZERO } from "../utilities"
 const { BigNumber } = require("ethers")
 import {ethers, upgrades} from "hardhat"
-import {ReactToken, ReactToken__factory} from "../types";
+import {ReactToken, ReactToken__factory} from "../../types";
 
-describe("ReactMiniMasterV2", function () {
+describe("MiniChefV2", function () {
   before(async function () {
     this.ReactToken = (await ethers.getContractFactory(
         'ReactToken'
     )) as ReactToken__factory
 
-    await prepare(this, ['ReactMiniMasterV2', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
+    await prepare(this, ['MiniChefV2', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
@@ -26,7 +26,7 @@ describe("ReactMiniMasterV2", function () {
     await deploy(this,
       [["lp", this.ERC20Mock, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", this.ERC20Mock, ["Dummy", "DummyT", getBigNumber(10)]],
-      ['chief', this.ReactMiniMasterV2, [this.react.address]],
+      ['chief', this.MiniChefV2, [this.react.address]],
       ["rlp", this.ERC20Mock, ["LP", "rLPT", getBigNumber(10)]],
       ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])

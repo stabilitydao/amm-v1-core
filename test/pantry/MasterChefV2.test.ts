@@ -1,9 +1,9 @@
 import { expect, assert } from "chai";
-import { advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZERO } from "./utilities"
+import { advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZERO } from "../utilities"
 import {ethers, upgrades} from "hardhat";
-import {ReactToken, ReactToken__factory} from "../types";
+import {ReactToken, ReactToken__factory} from "../../types";
 
-describe("ReactMasterV2", function () {
+describe("MasterChefV2", function () {
   before(async function () {
     this.ReactToken = (await ethers.getContractFactory(
         'ReactToken'
@@ -11,7 +11,7 @@ describe("ReactMasterV2", function () {
 
     this.ReactSyrup = await ethers.getContractFactory("ReactSyrup")
 
-    await prepare(this, ['ReactMaster', 'ERC20Mock', 'ReactMasterV2', 'RewarderMock', 'RewarderBrokenMock'])
+    await prepare(this, ['ReactMaster', 'ERC20Mock', 'MasterChefV2', 'RewarderMock', 'RewarderBrokenMock'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
@@ -39,7 +39,7 @@ describe("ReactMasterV2", function () {
     await this.chief.deposit(1, getBigNumber(10))
 
     await deploy(this, [
-        ['chief2', this.ReactMasterV2, [this.chief.address, this.react.address, 2]],
+        ['chief2', this.MasterChefV2, [this.chief.address, this.react.address, 2]],
         ["rlp", this.ERC20Mock, ["LP", "rLPT", getBigNumber(10)]],
         ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])

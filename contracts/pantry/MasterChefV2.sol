@@ -6,9 +6,9 @@ pragma experimental ABIEncoderV2;
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringBatchable.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
-import "./libraries/SignedSafeMath.sol";
-import "./interfaces/IRewarder.sol";
-import "./interfaces/IReactMaster.sol";
+import "../libraries/SignedSafeMath.sol";
+import "../interfaces/IRewarder.sol";
+import "../interfaces/IReactMaster.sol";
 
 interface IMigrator {
     // Take the current LP token address and return the new LP token address.
@@ -21,7 +21,7 @@ interface IMigrator {
 /// The idea for this ReactMaster V2 (RMV2) contract is therefore to be the owner of a dummy token
 /// that is deposited into the ReactMaster V1 (RMV1) contract.
 /// The allocation point for this pool on RMV1 is the total allocation point for all pools that receive double incentives.
-contract ReactMasterV2 is BoringOwnable, BoringBatchable {
+contract MasterChefV2 is BoringOwnable, BoringBatchable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;

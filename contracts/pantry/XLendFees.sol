@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./amm-v1/interfaces/IUniswapV2Pair.sol";
-import "./amm-v1/interfaces/IUniswapV2Factory.sol";
+import "../amm-v1/interfaces/IUniswapV2Pair.sol";
+import "../amm-v1/interfaces/IUniswapV2Factory.sol";
 
 
 interface IVaultWithdraw {
@@ -103,10 +103,10 @@ contract XLendFees is Ownable {
         // update Kashi fees for this Maker contract (`feeTo`)
         kashiPair.withdrawFees();
 
-        // convert updated Kashi balance to Vault shares
+        // convert updated Kashi balance to pantry shares
         uint256 vaultShares = kashiPair.removeAsset(address(this), kashiPair.balanceOf(address(this)));
 
-        // convert Vault shares to underlying Kashi asset (`token0`) balance (`amount0`) for Maker
+        // convert pantry shares to underlying Kashi asset (`token0`) balance (`amount0`) for Maker
         address token0 = kashiPair.asset();
         (uint256 amount0, ) = vault.withdraw(IERC20(token0), address(this), address(this), 0, vaultShares);
 
