@@ -4,10 +4,11 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   const { deployer, dev } = await getNamedAccounts()
 
   const react = await ethers.getContract("ReactToken")
-  
+  const syrup = await ethers.getContract("XStakeBar")
+
   const { address } = await deploy("ReactMaster", {
     from: deployer,
-    args: [react.address, dev, "1000000000000000000000", "0", "1000000000000000000000"],
+    args: [react.address, syrup.address, dev, "1000000000000000000000", "0", "1000000000000000000000"],
     log: true,
     deterministicDeployment: false
   })
@@ -28,11 +29,6 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   } else {
     console.log(`REVERTED!`)
   }
-  /*if (await react.owner() !== address) {
-    // Transfer React Ownership to Chef
-    console.log("Transfer React Ownership to Chef")
-    await (await react.transferOwnership(address)).wait()
-  }*/
 
   const reactMaster = await ethers.getContract("ReactMaster")
   if (await reactMaster.owner() !== dev) {
@@ -43,4 +39,4 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
 }
 
 module.exports.tags = ["ReactMaster"]
-module.exports.dependencies = ["Factory", "Router", "ReactToken"]
+module.exports.dependencies = ["Factory", "Router", "ReactToken", "XStakeBar"]

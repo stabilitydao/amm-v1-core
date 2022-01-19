@@ -9,6 +9,8 @@ describe("ReactMasterV2", function () {
         'ReactToken'
     )) as ReactToken__factory
 
+    this.ReactSyrup = await ethers.getContractFactory("ReactSyrup")
+
     await prepare(this, ['ReactMaster', 'ERC20Mock', 'ReactMasterV2', 'RewarderMock', 'RewarderBrokenMock'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
@@ -19,28 +21,30 @@ describe("ReactMasterV2", function () {
     this.react = (await upgrades.deployProxy(this.ReactToken, {
       kind: 'uups',
     })) as ReactToken
-
     await this.react.deployed()
+
+    this.syrup = await this.ReactSyrup.deploy(this.react.address)
+    await this.syrup.deployed()
 
     await deploy(this,
       [["lp", this.ERC20Mock, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", this.ERC20Mock, ["Dummy", "DummyT", getBigNumber(10)]],
-      ['chief', this.ReactMaster, [this.react.address, this.bob.address, getBigNumber(100), "0", "0"]]
+      ['chief', this.ReactMaster, [this.react.address, this.syrup.address, this.bob.address, getBigNumber(100), "0", "0"]]
     ])
 
     this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
     await this.chief.add(100, this.lp.address, true)
     await this.chief.add(100, this.dummy.address, true)
     await this.lp.approve(this.chief.address, getBigNumber(10))
-    await this.chief.deposit(0, getBigNumber(10))
+    await this.chief.deposit(1, getBigNumber(10))
 
     await deploy(this, [
-        ['chief2', this.ReactMasterV2, [this.chief.address, this.react.address, 1]],
+        ['chief2', this.ReactMasterV2, [this.chief.address, this.react.address, 2]],
         ["rlp", this.ERC20Mock, ["LP", "rLPT", getBigNumber(10)]],
         ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
     await deploy(this, [["rewarder", this.RewarderMock, [getBigNumber(1), this.r.address, this.chief2.address]]])
-    await this.dummy.approve(this.chief2.address, getBigNumber(10))
+    await this.dummy.approve(this.chief2.address, getBigNumber(100))
     await this.chief2.init(this.dummy.address)
     await this.rlp.transfer(this.bob.address, getBigNumber(1))
   })

@@ -1,6 +1,6 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import {ReactToken, ReactToken__factory} from "../types";
+import {ReactSyrup__factory, ReactToken, ReactToken__factory} from "../types";
 
 describe("Migrator", function () {
   before(async function () {
@@ -13,9 +13,9 @@ describe("Migrator", function () {
     this.UniswapV2Factory = await ethers.getContractFactory("Factory")
     this.UniswapV2Pair = await ethers.getContractFactory("Pair")
     this.ERC20Mock = await ethers.getContractFactory("ERC20Mock", this.minter)
-    this.ReactToken = (await ethers.getContractFactory(
-        'ReactToken'
-    )) as ReactToken__factory
+    this.ReactToken = (await ethers.getContractFactory('ReactToken')) as ReactToken__factory
+    this.ReactSyrup = (await ethers.getContractFactory("ReactSyrup")) as ReactSyrup__factory
+
     this.ReactMaster = await ethers.getContractFactory("ReactMaster")
     this.Migrator = await ethers.getContractFactory("Migrator")
   })
@@ -32,6 +32,9 @@ describe("Migrator", function () {
     })) as ReactToken
     await this.react.deployed()
 
+    this.syrup = await this.ReactSyrup.deploy(this.react.address)
+    await this.syrup.deployed()
+
     this.weth = await this.ERC20Mock.deploy("WETH", "WETH", "100000000")
     await this.weth.deployed()
 
@@ -46,7 +49,7 @@ describe("Migrator", function () {
 
     this.lp2 = await this.UniswapV2Pair.attach((await pair2.wait()).events[0].args.pair)
 
-    this.chief = await this.ReactMaster.deploy(this.react.address, this.dev.address, "1000", "0", "100000")
+    this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "100000")
     await this.chief.deployed()
 
     this.migrator = await this.Migrator.deploy(this.chief.address, this.factory1.address, this.factory2.address, "0")
@@ -68,19 +71,19 @@ describe("Migrator", function () {
     await this.weth.connect(this.minter).transfer(this.lp1.address, "5000", { from: this.minter.address })
     await this.lp1.sync()
     await this.lp1.connect(this.minter).approve(this.chief.address, "100000000000", { from: this.minter.address })
-    await this.chief.connect(this.minter).deposit("0", "2000000", { from: this.minter.address })
+    await this.chief.connect(this.minter).deposit(1, "2000000", { from: this.minter.address })
     expect(await this.lp1.balanceOf(this.chief.address), "2000000")
-    await expect(this.chief.migrate(0)).to.be.revertedWith("migrate: no migrator")
+    await expect(this.chief.migrate(1)).to.be.revertedWith("migrate: no migrator")
 
     await this.chief.setMigrator(this.migrator.address)
-    await expect(this.chief.migrate(0)).to.be.revertedWith("migrate: bad")
+    await expect(this.chief.migrate(1)).to.be.revertedWith("migrate: bad")
 
     await this.factory2.setMigrator(this.migrator.address)
-    await this.chief.migrate(0)
+    await this.chief.migrate(1)
     expect(await this.lp1.balanceOf(this.chief.address)).to.equal("0")
     expect(await this.lp2.balanceOf(this.chief.address)).to.equal("2000000")
 
-    await this.chief.connect(this.minter).withdraw("0", "2000000", { from: this.minter.address })
+    await this.chief.connect(this.minter).withdraw(1, "2000000", { from: this.minter.address })
     await this.lp2.connect(this.minter).transfer(this.lp2.address, "2000000", { from: this.minter.address })
     await this.lp2.burn(this.bob.address)
     expect(await this.token.balanceOf(this.bob.address)).to.equal("9033718")

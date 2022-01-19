@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./ReactToken.sol";
+import "./ReactSyrup.sol";
 
 interface IMigrator {
     // Perform LP token migration from legacy UniswapV2 to ReactSwap.
@@ -20,6 +20,10 @@ interface IMigrator {
     // else something bad will happen. Traditional UniswapV2 does not
     // do that so be careful!
     function migrate(IERC20 token) external returns (IERC20);
+}
+
+interface IERC20Mintable is IERC20 {
+    function mint(address to, uint256 amount) external;
 }
 
 // ReactMaster is the master of React. He can make React and he is a fair guy.
@@ -55,8 +59,13 @@ contract ReactMaster is Ownable {
         uint256 lastRewardBlock; // Last block number that REACTs distribution occurs.
         uint256 accReactPerShare; // Accumulated REACTs per share, times 1e12. See below.
     }
+
     // The REACT TOKEN!
-    ReactToken public react;
+    IERC20Mintable public react;
+
+    // The SYRUP TOKEN!
+    ReactSyrup public syrup;
+
     // Dev address.
     address public devaddr;
     // Block number when bonus REACT period ends.
@@ -64,7 +73,7 @@ contract ReactMaster is Ownable {
     // REACT tokens created per block.
     uint256 public reactPerBlock;
     // Bonus muliplier for early react makers.
-    uint256 public constant BONUS_MULTIPLIER = 10;
+    uint256 public BONUS_MULTIPLIER = 10;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
     IMigrator public migrator;
     // Info of each pool.
@@ -84,17 +93,33 @@ contract ReactMaster is Ownable {
     );
 
     constructor(
-        ReactToken _react,
+        IERC20Mintable _react,
+        ReactSyrup _syrup,
         address _devaddr,
         uint256 _reactPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock
     ) {
         react = _react;
+        syrup = _syrup;
         devaddr = _devaddr;
         reactPerBlock = _reactPerBlock;
         bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
+
+        // staking pool
+        poolInfo.push(PoolInfo({
+            lpToken: _react,
+            allocPoint: 0,
+            lastRewardBlock: startBlock,
+            accReactPerShare: 0
+        }));
+
+        totalAllocPoint = 0;
+    }
+
+    function updateBonusMultiplier(uint256 k) public onlyOwner {
+        BONUS_MULTIPLIER = k;
     }
 
     function poolLength() external view returns (uint256) {
@@ -103,16 +128,11 @@ contract ReactMaster is Ownable {
 
     // Add a new lp to the pool. Can only be called by the owner.
     // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-    function add(
-        uint256 _allocPoint,
-        IERC20 _lpToken,
-        bool _withUpdate
-    ) public onlyOwner {
+    function add(uint256 _allocPoint, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardBlock =
-            block.number > startBlock ? block.number : startBlock;
+        uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
         poolInfo.push(
             PoolInfo({
@@ -125,18 +145,28 @@ contract ReactMaster is Ownable {
     }
 
     // Update the given pool's REACT allocation point. Can only be called by the owner.
-    function set(
-        uint256 _pid,
-        uint256 _allocPoint,
-        bool _withUpdate
-    ) public onlyOwner {
+    function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
-            _allocPoint
-        );
+        uint256 prevAllocPoint = poolInfo[_pid].allocPoint;
         poolInfo[_pid].allocPoint = _allocPoint;
+        if (prevAllocPoint != _allocPoint) {
+            totalAllocPoint = totalAllocPoint.sub(prevAllocPoint).add(_allocPoint);
+        }
+    }
+
+    function updateStakingPool(uint256 divider) public onlyOwner {
+        uint256 length = poolInfo.length;
+        uint256 points = 0;
+        for (uint256 pid = 1; pid < length; ++pid) {
+            points = points.add(poolInfo[pid].allocPoint);
+        }
+        if (points != 0) {
+            points = points.div(divider);
+            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(points);
+            poolInfo[0].allocPoint = points;
+        }
     }
 
     // Set the migrator contract. Can only be called by the owner.
@@ -157,11 +187,8 @@ contract ReactMaster is Ownable {
     }
 
     // Return reward multiplier over the given _from to _to block.
-    function getMultiplier(uint256 _from, uint256 _to)
-        public
-        view
-        returns (uint256)
-    {
+    // todo dont need bonusEndBlock if multiplying changeable?
+    function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
         if (_to <= bonusEndBlock) {
             return _to.sub(_from).mul(BONUS_MULTIPLIER);
         } else if (_from >= bonusEndBlock) {
@@ -232,41 +259,89 @@ contract ReactMaster is Ownable {
 
     // Deposit LP tokens to ReactMaster for REACT allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
+        require (_pid != 0, 'deposit REACT by staking');
+
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending =
-                user.amount.mul(pool.accReactPerShare).div(1e12).sub(
-                    user.rewardDebt
-                );
-            safeReactTransfer(msg.sender, pending);
+            uint256 pending = user.amount.mul(pool.accReactPerShare).div(1e12).sub(user.rewardDebt);
+            if (pending > 0) {
+                safeReactTransfer(msg.sender, pending);
+            }
         }
-        pool.lpToken.safeTransferFrom(
-            address(msg.sender),
-            address(this),
-            _amount
-        );
-        user.amount = user.amount.add(_amount);
+        if (_amount > 0) {
+            pool.lpToken.safeTransferFrom(
+                address(msg.sender),
+                address(this),
+                _amount
+            );
+            user.amount = user.amount.add(_amount);
+        }
+
         user.rewardDebt = user.amount.mul(pool.accReactPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
     // Withdraw LP tokens from ReactMaster.
     function withdraw(uint256 _pid, uint256 _amount) public {
+        require (_pid != 0, 'withdraw REACT by unstaking');
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending =
-            user.amount.mul(pool.accReactPerShare).div(1e12).sub(
-                user.rewardDebt
-            );
-        safeReactTransfer(msg.sender, pending);
-        user.amount = user.amount.sub(_amount);
+        uint256 pending = user.amount.mul(pool.accReactPerShare).div(1e12).sub(user.rewardDebt);
+        if(pending > 0) {
+            safeReactTransfer(msg.sender, pending);
+        }
+        if(_amount > 0) {
+            user.amount = user.amount.sub(_amount);
+            pool.lpToken.safeTransfer(address(msg.sender), _amount);
+        }
+
         user.rewardDebt = user.amount.mul(pool.accReactPerShare).div(1e12);
-        pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
+    }
+
+    // Stake REACT tokens
+    function enterStaking(uint256 _amount) public {
+        PoolInfo storage pool = poolInfo[0];
+        UserInfo storage user = userInfo[0][msg.sender];
+        updatePool(0);
+        if (user.amount > 0) {
+            uint256 pending = user.amount.mul(pool.accReactPerShare).div(1e12).sub(user.rewardDebt);
+            if(pending > 0) {
+                safeReactTransfer(msg.sender, pending);
+            }
+        }
+        if(_amount > 0) {
+            pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+            user.amount = user.amount.add(_amount);
+        }
+        user.rewardDebt = user.amount.mul(pool.accReactPerShare).div(1e12);
+
+        syrup.mint(msg.sender, _amount);
+        emit Deposit(msg.sender, 0, _amount);
+    }
+
+    // Withdraw REACT tokens from STAKING.
+    function leaveStaking(uint256 _amount) public {
+        PoolInfo storage pool = poolInfo[0];
+        UserInfo storage user = userInfo[0][msg.sender];
+        require(user.amount >= _amount, "withdraw: not good");
+        updatePool(0);
+        uint256 pending = user.amount.mul(pool.accReactPerShare).div(1e12).sub(user.rewardDebt);
+        if(pending > 0) {
+            safeReactTransfer(msg.sender, pending);
+        }
+        if(_amount > 0) {
+            user.amount = user.amount.sub(_amount);
+            pool.lpToken.safeTransfer(address(msg.sender), _amount);
+        }
+        user.rewardDebt = user.amount.mul(pool.accReactPerShare).div(1e12);
+
+        syrup.burn(msg.sender, _amount);
+        emit Withdraw(msg.sender, 0, _amount);
     }
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
