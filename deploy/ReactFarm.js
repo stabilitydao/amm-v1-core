@@ -4,11 +4,15 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   const { deployer, dev } = await getNamedAccounts()
 
   const react = await ethers.getContract("ReactToken")
-  const syrup = await ethers.getContract("XStakeBar")
+  const syrup = await ethers.getContract("ReactSyrup")
+
+  let startBlock = "0"
+  let bonusEndBlock = "100000000"
+  let reactPerBlock = "1000000000000000000"
 
   const { address } = await deploy("ReactFarm", {
     from: deployer,
-    args: [react.address, syrup.address, dev, "1000000000000000000000", "0", "1000000000000000000000"],
+    args: [react.address, syrup.address, dev, reactPerBlock, startBlock, bonusEndBlock],
     log: true,
     deterministicDeployment: false
   })
@@ -39,4 +43,4 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
 }
 
 module.exports.tags = ["ReactFarm"]
-module.exports.dependencies = ["ReactSwapFactory", "Router", "ReactToken", "XStakeBar"]
+module.exports.dependencies = ["ReactToken", "ReactSyrup"]
