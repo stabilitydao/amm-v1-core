@@ -5,7 +5,6 @@ pragma solidity ^0.8.2;
 import "./interfaces/IUniswapV2Pair.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 
-
 contract Migrator {
     address public chef;
     address public oldFactory;

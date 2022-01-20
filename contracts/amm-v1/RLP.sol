@@ -20,7 +20,11 @@ contract RLP {
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
     mapping(address => uint256) public nonces;
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     constructor() {
@@ -53,12 +57,20 @@ contract RLP {
         emit Transfer(from, address(0), value);
     }
 
-    function _approve(address owner, address spender, uint256 value) private {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) private {
         allowance[owner][spender] = value;
         emit Approval(owner, spender, value);
     }
 
-    function _transfer(address from, address to, uint256 value) private {
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) private {
         balanceOf[from] = balanceOf[from].sub(value);
         balanceOf[to] = balanceOf[to].add(value);
         emit Transfer(from, to, value);
@@ -88,7 +100,15 @@ contract RLP {
         return true;
     }
 
-    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
         require(deadline >= block.timestamp, "RLP: EXPIRED");
         bytes32 digest =
             keccak256(

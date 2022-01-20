@@ -57,20 +57,50 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     IRewarder[] public rewarder;
 
     /// @notice Info of each user that stakes LP tokens.
-    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     /// @dev Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint;
 
     uint256 public reactPerSecond;
     uint256 private constant ACC_REACT_PRECISION = 1e12;
 
-    event Deposit(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
-    event Withdraw(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
-    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
+    event Deposit(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount,
+        address indexed to
+    );
+    event Withdraw(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount,
+        address indexed to
+    );
+    event EmergencyWithdraw(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount,
+        address indexed to
+    );
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
-    event LogPoolAddition(uint256 indexed pid, uint256 allocPoint, IERC20 indexed lpToken, IRewarder indexed rewarder);
-    event LogSetPool(uint256 indexed pid, uint256 allocPoint, IRewarder indexed rewarder, bool overwrite);
-    event LogUpdatePool(uint256 indexed pid, uint64 lastRewardTime, uint256 lpSupply, uint256 accReactPerShare);
+    event LogPoolAddition(
+        uint256 indexed pid,
+        uint256 allocPoint,
+        IERC20 indexed lpToken,
+        IRewarder indexed rewarder
+    );
+    event LogSetPool(
+        uint256 indexed pid,
+        uint256 allocPoint,
+        IRewarder indexed rewarder,
+        bool overwrite
+    );
+    event LogUpdatePool(
+        uint256 indexed pid,
+        uint64 lastRewardTime,
+        uint256 lpSupply,
+        uint256 accReactPerShare
+    );
     event LogReactPerSecond(uint256 reactPerSecond);
 
     /// @param _react The REACT token contract address.
@@ -88,17 +118,28 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     /// @param allocPoint AP of the new pool.
     /// @param _lpToken Address of the LP ERC-20 token.
     /// @param _rewarder Address of the rewarder delegate.
-    function add(uint256 allocPoint, IERC20 _lpToken, IRewarder _rewarder) public onlyOwner {
+    function add(
+        uint256 allocPoint,
+        IERC20 _lpToken,
+        IRewarder _rewarder
+    ) public onlyOwner {
         totalAllocPoint = totalAllocPoint.add(allocPoint);
         lpToken.push(_lpToken);
         rewarder.push(_rewarder);
 
-        poolInfo.push(PoolInfo({
-            allocPoint: allocPoint.to64(),
-            lastRewardTime: block.timestamp.to64(),
-            accReactPerShare: 0
-        }));
-        emit LogPoolAddition(lpToken.length.sub(1), allocPoint, _lpToken, _rewarder);
+        poolInfo.push(
+            PoolInfo({
+                allocPoint: allocPoint.to64(),
+                lastRewardTime: block.timestamp.to64(),
+                accReactPerShare: 0
+            })
+        );
+        emit LogPoolAddition(
+            lpToken.length.sub(1),
+            allocPoint,
+            _lpToken,
+            _rewarder
+        );
     }
 
     /// @notice Update the given pool's REACT allocation point and `IRewarder` contract. Can only be called by the owner.
@@ -106,11 +147,25 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     /// @param _allocPoint New AP of the pool.
     /// @param _rewarder Address of the rewarder delegate.
     /// @param overwrite True if _rewarder should be `set`. Otherwise `_rewarder` is ignored.
-    function set(uint256 _pid, uint256 _allocPoint, IRewarder _rewarder, bool overwrite) public onlyOwner {
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
+    function set(
+        uint256 _pid,
+        uint256 _allocPoint,
+        IRewarder _rewarder,
+        bool overwrite
+    ) public onlyOwner {
+        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
+            _allocPoint
+        );
         poolInfo[_pid].allocPoint = _allocPoint.to64();
-        if (overwrite) { rewarder[_pid] = _rewarder; }
-        emit LogSetPool(_pid, _allocPoint, overwrite ? _rewarder : rewarder[_pid], overwrite);
+        if (overwrite) {
+            rewarder[_pid] = _rewarder;
+        }
+        emit LogSetPool(
+            _pid,
+            _allocPoint,
+            overwrite ? _rewarder : rewarder[_pid],
+            overwrite
+        );
     }
 
     /// @notice Sets the react per second to be distributed. Can only be called by the owner.
@@ -129,12 +184,18 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     /// @notice Migrate LP token to another LP contract through the `migrator` contract.
     /// @param _pid The index of the pool. See `poolInfo`.
     function migrate(uint256 _pid) public {
-        require(address(migrator) != address(0), "ReactMasterV2: no migrator set");
+        require(
+            address(migrator) != address(0),
+            "ReactMasterV2: no migrator set"
+        );
         IERC20 _lpToken = lpToken[_pid];
         uint256 bal = _lpToken.balanceOf(address(this));
         _lpToken.approve(address(migrator), bal);
         IERC20 newLpToken = migrator.migrate(_lpToken);
-        require(bal == newLpToken.balanceOf(address(this)), "ReactMasterV2: migrated balance must match");
+        require(
+            bal == newLpToken.balanceOf(address(this)),
+            "ReactMasterV2: migrated balance must match"
+        );
         lpToken[_pid] = newLpToken;
     }
 
@@ -142,17 +203,28 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending REACT reward for a given user.
-    function pendingReact(uint256 _pid, address _user) external view returns (uint256 pending) {
+    function pendingReact(uint256 _pid, address _user)
+        external
+        view
+        returns (uint256 pending)
+    {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accReactPerShare = pool.accReactPerShare;
         uint256 lpSupply = lpToken[_pid].balanceOf(address(this));
         if (block.timestamp > pool.lastRewardTime && lpSupply != 0) {
             uint256 time = block.timestamp.sub(pool.lastRewardTime);
-            uint256 reactReward = time.mul(reactPerSecond).mul(pool.allocPoint) / totalAllocPoint;
-            accReactPerShare = accReactPerShare.add(reactReward.mul(ACC_REACT_PRECISION) / lpSupply);
+            uint256 reactReward =
+                time.mul(reactPerSecond).mul(pool.allocPoint) / totalAllocPoint;
+            accReactPerShare = accReactPerShare.add(
+                reactReward.mul(ACC_REACT_PRECISION) / lpSupply
+            );
         }
-        pending = int256(user.amount.mul(accReactPerShare) / ACC_REACT_PRECISION).sub(user.rewardDebt).toUInt256();
+        pending = int256(
+            user.amount.mul(accReactPerShare) / ACC_REACT_PRECISION
+        )
+            .sub(user.rewardDebt)
+            .toUInt256();
     }
 
     /// @notice Update reward variables for all pools. Be careful of gas spending!
@@ -173,12 +245,21 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
             uint256 lpSupply = lpToken[pid].balanceOf(address(this));
             if (lpSupply > 0) {
                 uint256 time = block.timestamp.sub(pool.lastRewardTime);
-                uint256 reactReward = time.mul(reactPerSecond).mul(pool.allocPoint) / totalAllocPoint;
-                pool.accReactPerShare = pool.accReactPerShare.add((reactReward.mul(ACC_REACT_PRECISION) / lpSupply).to128());
+                uint256 reactReward =
+                    time.mul(reactPerSecond).mul(pool.allocPoint) /
+                        totalAllocPoint;
+                pool.accReactPerShare = pool.accReactPerShare.add(
+                    (reactReward.mul(ACC_REACT_PRECISION) / lpSupply).to128()
+                );
             }
             pool.lastRewardTime = block.timestamp.to64();
             poolInfo[pid] = pool;
-            emit LogUpdatePool(pid, pool.lastRewardTime, lpSupply, pool.accReactPerShare);
+            emit LogUpdatePool(
+                pid,
+                pool.lastRewardTime,
+                lpSupply,
+                pool.accReactPerShare
+            );
         }
     }
 
@@ -186,13 +267,19 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to deposit.
     /// @param to The receiver of `amount` deposit benefit.
-    function deposit(uint256 pid, uint256 amount, address to) public {
+    function deposit(
+        uint256 pid,
+        uint256 amount,
+        address to
+    ) public {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][to];
 
         // Effects
         user.amount = user.amount.add(amount);
-        user.rewardDebt = user.rewardDebt.add(int256(amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION));
+        user.rewardDebt = user.rewardDebt.add(
+            int256(amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION)
+        );
 
         // Interactions
         IRewarder _rewarder = rewarder[pid];
@@ -209,12 +296,18 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens.
-    function withdraw(uint256 pid, uint256 amount, address to) public {
+    function withdraw(
+        uint256 pid,
+        uint256 amount,
+        address to
+    ) public {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
 
         // Effects
-        user.rewardDebt = user.rewardDebt.sub(int256(amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION));
+        user.rewardDebt = user.rewardDebt.sub(
+            int256(amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION)
+        );
         user.amount = user.amount.sub(amount);
 
         // Interactions
@@ -222,7 +315,7 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
         if (address(_rewarder) != address(0)) {
             _rewarder.onReactReward(pid, msg.sender, to, 0, user.amount);
         }
-        
+
         lpToken[pid].safeTransfer(to, amount);
 
         emit Withdraw(msg.sender, pid, amount, to);
@@ -234,8 +327,12 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
     function harvest(uint256 pid, address to) public {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
-        int256 accumulatedReact = int256(user.amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION);
-        uint256 _pendingReact = accumulatedReact.sub(user.rewardDebt).toUInt256();
+        int256 accumulatedReact =
+            int256(
+                user.amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION
+            );
+        uint256 _pendingReact =
+            accumulatedReact.sub(user.rewardDebt).toUInt256();
 
         // Effects
         user.rewardDebt = accumulatedReact;
@@ -244,35 +341,57 @@ contract MiniChefV2 is BoringOwnable, BoringBatchable {
         if (_pendingReact != 0) {
             REACT.safeTransfer(to, _pendingReact);
         }
-        
+
         IRewarder _rewarder = rewarder[pid];
         if (address(_rewarder) != address(0)) {
-            _rewarder.onReactReward( pid, msg.sender, to, _pendingReact, user.amount);
+            _rewarder.onReactReward(
+                pid,
+                msg.sender,
+                to,
+                _pendingReact,
+                user.amount
+            );
         }
 
         emit Harvest(msg.sender, pid, _pendingReact);
     }
-    
+
     /// @notice Withdraw LP tokens from RMV2 and harvest proceeds for transaction sender to `to`.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens and REACT rewards.
-    function withdrawAndHarvest(uint256 pid, uint256 amount, address to) public {
+    function withdrawAndHarvest(
+        uint256 pid,
+        uint256 amount,
+        address to
+    ) public {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][msg.sender];
-        int256 accumulatedReact = int256(user.amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION);
-        uint256 _pendingReact = accumulatedReact.sub(user.rewardDebt).toUInt256();
+        int256 accumulatedReact =
+            int256(
+                user.amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION
+            );
+        uint256 _pendingReact =
+            accumulatedReact.sub(user.rewardDebt).toUInt256();
 
         // Effects
-        user.rewardDebt = accumulatedReact.sub(int256(amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION));
+        user.rewardDebt = accumulatedReact.sub(
+            int256(amount.mul(pool.accReactPerShare) / ACC_REACT_PRECISION)
+        );
         user.amount = user.amount.sub(amount);
-        
+
         // Interactions
         REACT.safeTransfer(to, _pendingReact);
 
         IRewarder _rewarder = rewarder[pid];
         if (address(_rewarder) != address(0)) {
-            _rewarder.onReactReward(pid, msg.sender, to, _pendingReact, user.amount);
+            _rewarder.onReactReward(
+                pid,
+                msg.sender,
+                to,
+                _pendingReact,
+                user.amount
+            );
         }
 
         lpToken[pid].safeTransfer(to, amount);

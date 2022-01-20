@@ -1,11 +1,21 @@
-import { ethers } from "hardhat";
-const { keccak256, defaultAbiCoder } = require("ethers");
-import { expect } from "chai";
+import { ethers } from "hardhat"
+const { keccak256, defaultAbiCoder } = require("ethers")
+import { expect } from "chai"
 import { prepare, deploy, getBigNumber, createSLP } from "../utilities"
 
 describe("KashiReactMaker", function () {
   before(async function () {
-    await prepare(this, ["XLendFees", "XStakeBar", "ReactMakerKashiExploitMock", "ERC20Mock", "Factory", "Pair", "BentoBoxV1", "KashiPairMediumRiskV1", "PeggedOracleV1"])
+    await prepare(this, [
+      "XLendFees",
+      "XStakeBar",
+      "ReactMakerKashiExploitMock",
+      "ERC20Mock",
+      "Factory",
+      "Pair",
+      "BentoBoxV1",
+      "KashiPairMediumRiskV1",
+      "PeggedOracleV1",
+    ])
   })
 
   beforeEach(async function () {
@@ -23,7 +33,13 @@ describe("KashiReactMaker", function () {
     await deploy(this, [["bar", this.XStakeBar, [this.react.address]]])
     await deploy(this, [["vault", this.BentoBoxV1, [this.weth.address]]])
     await deploy(this, [["banker", this.KashiPairMediumRiskV1, [this.vault.address]]])
-    await deploy(this, [["reactMaker", this.XLendFees, [this.factory.address, this.bar.address, this.vault.address, this.react.address, this.weth.address, this.factory.pairCodeHash()]]])
+    await deploy(this, [
+      [
+        "reactMaker",
+        this.XLendFees,
+        [this.factory.address, this.bar.address, this.vault.address, this.react.address, this.weth.address, this.factory.pairCodeHash()],
+      ],
+    ])
     await deploy(this, [["exploiter", this.ReactMakerKashiExploitMock, [this.reactMaker.address]]])
     await deploy(this, [["oracle", this.PeggedOracleV1]])
     // Create SLPs
@@ -53,7 +69,14 @@ describe("KashiReactMaker", function () {
     await this.vault.deposit(this.weth.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
     await this.vault.deposit(this.strudel.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
     // Approve Kashi to spend 'alice' Bento tokens
-    await this.vault.setMasterContractApproval(this.alice.address, this.banker.address, true, "0", "0x0000000000000000000000000000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000000000000000000000000000")
+    await this.vault.setMasterContractApproval(
+      this.alice.address,
+      this.banker.address,
+      true,
+      "0",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    )
     // **TO-DO - Initialize Kashi Pair**
     //const oracleData = await this.oracle.getDataParameter("1")
     //const initData = defaultAbiCoder.encode(["address", "address", "address", "bytes"], [this.react.address, this.dai.address, this.oracle.address, oracleData])
@@ -62,9 +85,11 @@ describe("KashiReactMaker", function () {
 
   describe("setBridge", function () {
     it("only allows the owner to set bridge", async function () {
-      await expect(this.reactMaker.connect(this.bob).setBridge(this.react.address, this.weth.address, { from: this.bob.address })).to.be.revertedWith("Ownable: caller is not the owner")
+      await expect(
+        this.reactMaker.connect(this.bob).setBridge(this.react.address, this.weth.address, { from: this.bob.address })
+      ).to.be.revertedWith("Ownable: caller is not the owner")
     })
-    
+
     it("does not allow to set bridge for React", async function () {
       await expect(this.reactMaker.setBridge(this.react.address, this.weth.address)).to.be.revertedWith("Maker: Invalid bridge")
     })
@@ -83,7 +108,7 @@ describe("KashiReactMaker", function () {
         .withArgs(this.dai.address, this.react.address)
     })
   })
-  
+
   describe("convert", function () {
     it("reverts if caller is not EOA", async function () {
       await expect(this.exploiter.convert(this.react.address)).to.be.revertedWith("Maker: Must use EOA")

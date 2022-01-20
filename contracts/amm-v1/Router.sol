@@ -165,14 +165,8 @@ contract Router is IUniswapV2Router02 {
         (amountA, amountB) = tokenA == token0
             ? (amount0, amount1)
             : (amount1, amount0);
-        require(
-            amountA >= amountAMin,
-            "Router: INSUFFICIENT_A_AMOUNT"
-        );
-        require(
-            amountB >= amountBMin,
-            "Router: INSUFFICIENT_B_AMOUNT"
-        );
+        require(amountA >= amountAMin, "Router: INSUFFICIENT_A_AMOUNT");
+        require(amountB >= amountBMin, "Router: INSUFFICIENT_B_AMOUNT");
     }
 
     function removeLiquidityETH(
@@ -401,10 +395,7 @@ contract Router is IUniswapV2Router02 {
         returns (uint256[] memory amounts)
     {
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
-        require(
-            amounts[0] <= amountInMax,
-            "Router: EXCESSIVE_INPUT_AMOUNT"
-        );
+        require(amounts[0] <= amountInMax, "Router: EXCESSIVE_INPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -458,10 +449,7 @@ contract Router is IUniswapV2Router02 {
     {
         require(path[path.length - 1] == WETH, "Router: INVALID_PATH");
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
-        require(
-            amounts[0] <= amountInMax,
-            "Router: EXCESSIVE_INPUT_AMOUNT"
-        );
+        require(amounts[0] <= amountInMax, "Router: EXCESSIVE_INPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -518,10 +506,7 @@ contract Router is IUniswapV2Router02 {
     {
         require(path[0] == WETH, "Router: INVALID_PATH");
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
-        require(
-            amounts[0] <= msg.value,
-            "Router: EXCESSIVE_INPUT_AMOUNT"
-        );
+        require(amounts[0] <= msg.value, "Router: EXCESSIVE_INPUT_AMOUNT");
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(
             IWETH(WETH).transfer(

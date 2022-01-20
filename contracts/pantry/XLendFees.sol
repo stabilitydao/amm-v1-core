@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../amm-v1/interfaces/IUniswapV2Pair.sol";
 import "../amm-v1/interfaces/IUniswapV2Factory.sol";
 
-
 interface IVaultWithdraw {
     function withdraw(
         IERC20 token_,
@@ -22,9 +21,14 @@ interface IVaultWithdraw {
 
 interface IKashiWithdrawFee {
     function asset() external view returns (address);
+
     function balanceOf(address account) external view returns (uint256);
+
     function withdrawFees() external;
-    function removeAsset(address to, uint256 fraction) external returns (uint256 share);
+
+    function removeAsset(address to, uint256 fraction)
+        external
+        returns (uint256 share);
 }
 
 // XLendFees contract handles "serving up" rewards for XREACT holders by trading tokens collected from Kashi fees for REACT.
@@ -37,7 +41,7 @@ contract XLendFees is Ownable {
     address private immutable bar;
     //0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272
     IVaultWithdraw private immutable vault;
-    //0xF5BCE5077908a1b7370B9ae04AdC565EBd643966 
+    //0xF5BCE5077908a1b7370B9ae04AdC565EBd643966
     address private immutable react;
     //0x6B3595068778DD592e39A122f4f5a5cF09C90fE2
     address private immutable weth;
@@ -93,7 +97,10 @@ contract XLendFees is Ownable {
         _convert(kashiPair);
     }
 
-    function convertMultiple(IKashiWithdrawFee[] calldata kashiPair) external onlyEOA {
+    function convertMultiple(IKashiWithdrawFee[] calldata kashiPair)
+        external
+        onlyEOA
+    {
         for (uint256 i = 0; i < kashiPair.length; i++) {
             _convert(kashiPair[i]);
         }
@@ -104,11 +111,22 @@ contract XLendFees is Ownable {
         kashiPair.withdrawFees();
 
         // convert updated Kashi balance to pantry shares
-        uint256 vaultShares = kashiPair.removeAsset(address(this), kashiPair.balanceOf(address(this)));
+        uint256 vaultShares =
+            kashiPair.removeAsset(
+                address(this),
+                kashiPair.balanceOf(address(this))
+            );
 
         // convert pantry shares to underlying Kashi asset (`token0`) balance (`amount0`) for Maker
         address token0 = kashiPair.asset();
-        (uint256 amount0, ) = vault.withdraw(IERC20(token0), address(this), address(this), 0, vaultShares);
+        (uint256 amount0, ) =
+            vault.withdraw(
+                IERC20(token0),
+                address(this),
+                address(this),
+                0,
+                vaultShares
+            );
 
         emit LogConvert(
             msg.sender,
@@ -119,7 +137,10 @@ contract XLendFees is Ownable {
         );
     }
 
-    function _convertStep(address token0, uint256 amount0) private returns (uint256 reactOut) {
+    function _convertStep(address token0, uint256 amount0)
+        private
+        returns (uint256 reactOut)
+    {
         if (token0 == react) {
             IERC20(token0).safeTransfer(bar, amount0);
             reactOut = amount0;
@@ -141,21 +162,29 @@ contract XLendFees is Ownable {
         uint256 amountIn,
         address to
     ) private returns (uint256 amountOut) {
-        (address token0, address token1) = fromToken < toToken ? (fromToken, toToken) : (toToken, fromToken);
+        (address token0, address token1) =
+            fromToken < toToken ? (fromToken, toToken) : (toToken, fromToken);
         IUniswapV2Pair pair =
             IUniswapV2Pair(
                 address(
                     uint160(
                         uint256(
-                            keccak256(abi.encodePacked(hex"ff", factory, keccak256(abi.encodePacked(token0, token1)), pairCodeHash))
+                            keccak256(
+                                abi.encodePacked(
+                                    hex"ff",
+                                    factory,
+                                    keccak256(abi.encodePacked(token0, token1)),
+                                    pairCodeHash
+                                )
+                            )
                         )
                     )
                 )
             );
-        
+
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
         uint256 amountInWithFee = amountIn.mul(997);
-        
+
         if (toToken > fromToken) {
             amountOut =
                 amountInWithFee.mul(reserve1) /
