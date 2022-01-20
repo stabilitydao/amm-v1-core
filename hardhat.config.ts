@@ -84,7 +84,7 @@ const config: HardhatUserConfig = {
       live: true,
       saveDeployments: true,
       tags: ["staging"],
-      gasPrice: 5000000000,
+      gasPrice: 50000000000,
       gasMultiplier: 4,
     },
     rinkeby: {
