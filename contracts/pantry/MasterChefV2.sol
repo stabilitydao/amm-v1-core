@@ -6,9 +6,9 @@ pragma experimental ABIEncoderV2;
 import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringBatchable.sol";
 import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
-import "../libraries/SignedSafeMath.sol";
-import "../interfaces/IRewarder.sol";
-import "../interfaces/IReactMaster.sol";
+import "./libraries/SignedSafeMath.sol";
+import "./interfaces/IRewarder.sol";
+import "./interfaces/IReactMaster.sol";
 
 interface IMigrator {
     // Take the current LP token address and return the new LP token address.
