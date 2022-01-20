@@ -143,7 +143,7 @@ task("erc20:approve", "ERC20 approve")
 .addParam("spender", "Spender")
 .addOptionalParam("deadline", MaxUint256)
 .setAction(async function ({ token, spender, deadline }, { ethers: { getNamedSigner } }, runSuper) {
-  const erc20 = await ethers.getContractFactory("UniswapV2ERC20")
+  const erc20 = await ethers.getContractFactory("RLP")
   
   const slp = erc20.attach(token)   
     deadline = MaxUint256
@@ -161,6 +161,15 @@ task("factory:set-fee-to", "Factory set fee to")
 
 // TODO: Swap?
 
+
+task("init-code-hash", "Prints pair init code hash").setAction(async function({ address }, { ethers }) {
+    // console.log("Gas price", (await ethers.provider.getGasPrice()).toString())
+
+    const factory = await ethers.getContract("ReactSwapFactory")
+    const hash = await factory.pairCodeHash()
+    console.log(hash)
+})
+
 // TODO: Test
 task("router:add-liquidity", "Router add liquidity")
 .addParam("tokenA", "Token A")
@@ -172,7 +181,7 @@ task("router:add-liquidity", "Router add liquidity")
 .addParam("to", "To")
 .addOptionalParam("deadline", MaxUint256)
 .setAction(async function ({ tokenA, tokenB, tokenADesired, tokenBDesired, tokenAMinimum, tokenBMinimum, to, deadline }, { ethers: { getNamedSigner } }, runSuper) {
-  const router = await ethers.getContract("UniswapV2Router")
+  const router = await ethers.getContract("Router")
   await run("erc20:approve", { token: tokenA, spender: router.address })
   await run("erc20:approve", { token: tokenB, spender: router.address })
   await (await router.connect(await getNamedSigner("dev")).addLiquidity(tokenA, tokenB, tokenADesired, tokenBDesired, tokenAMinimum, tokenBMinimum, to, deadline)).wait()    
@@ -187,9 +196,11 @@ task("router:add-liquidity-eth", "Router add liquidity eth")
 .addParam("to", "To")
 .addOptionalParam("deadline", MaxUint256)
 .setAction(async function ({ token, tokenDesired, tokenMinimum, ethMinimum, to, deadline }, { ethers: { getNamedSigner } }, runSuper) {
-  const router = await ethers.getContract("UniswapV2Router02")
+  const router = await ethers.getContract("Router")
   await run("erc20:approve", { token, spender: router.address })
     deadline = MaxUint256
+
+
   await (await router.connect(await getNamedSigner("dev")).addLiquidityETH(token, tokenDesired, tokenMinimum, ethMinimum, to, deadline, {value: ethMinimum})).wait()
 });
 

@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./ReactSyrup.sol";
 
 interface IMigrator {
     // Perform LP token migration from legacy UniswapV2 to ReactSwap.
@@ -25,15 +24,13 @@ interface IMigrator {
 interface IERC20Mintable is IERC20 {
     function mint(address to, uint256 amount) external;
 }
+interface IERC20MintableBurnable is IERC20 {
+    function mint(address to, uint256 amount) external;
+    function burn(address from, uint256 amount) external;
+}
 
-// ReactMaster is the master of React. He can make React and he is a fair guy.
-//
-// Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once REACT is sufficiently
-// distributed and the community can show to govern itself.
-//
-// Have fun reading it. Hopefully it's bug-free. God bless.
-contract ReactMaster is Ownable {
+// This is a farm that creates and distributes new REACTs fairly
+contract ReactFarm is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     // Info of each user.
@@ -64,7 +61,7 @@ contract ReactMaster is Ownable {
     IERC20Mintable public react;
 
     // The SYRUP TOKEN!
-    ReactSyrup public syrup;
+    IERC20MintableBurnable public syrup;
 
     // Dev address.
     address public devaddr;
@@ -94,7 +91,7 @@ contract ReactMaster is Ownable {
 
     constructor(
         IERC20Mintable _react,
-        ReactSyrup _syrup,
+        IERC20MintableBurnable _syrup,
         address _devaddr,
         uint256 _reactPerBlock,
         uint256 _startBlock,
@@ -257,7 +254,7 @@ contract ReactMaster is Ownable {
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to ReactMaster for REACT allocation.
+    // Deposit LP tokens to ReactFarm for REACT allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
         require (_pid != 0, 'deposit REACT by staking');
 
@@ -283,7 +280,7 @@ contract ReactMaster is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-    // Withdraw LP tokens from ReactMaster.
+    // Withdraw LP tokens from ReactFarm.
     function withdraw(uint256 _pid, uint256 _amount) public {
         require (_pid != 0, 'withdraw REACT by unstaking');
         PoolInfo storage pool = poolInfo[_pid];

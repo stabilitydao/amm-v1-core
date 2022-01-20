@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { advanceBlockTo } from "./utilities"
 import {ReactToken, ReactToken__factory} from "../types/";
 
-describe("ReactMaster", function () {
+describe("ReactFarm", function () {
   before(async function () {
     this.signers = await ethers.getSigners()
     this.alice = this.signers[0]
@@ -12,7 +12,7 @@ describe("ReactMaster", function () {
     this.dev = this.signers[3]
     this.minter = this.signers[4]
 
-    this.ReactMaster = await ethers.getContractFactory("ReactMaster")
+    this.ReactFarm = await ethers.getContractFactory("ReactFarm")
     this.ReactToken = (await ethers.getContractFactory(
         'ReactToken'
     )) as ReactToken__factory
@@ -32,7 +32,7 @@ describe("ReactMaster", function () {
   })
 
   it("should set correct state variables", async function () {
-    this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "1000")
+    this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "1000")
     await this.chief.deployed()
 
     this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.alice.address)
@@ -49,7 +49,7 @@ describe("ReactMaster", function () {
   })
 
   it("should allow dev and only dev to update dev", async function () {
-    this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "1000")
+    this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "1000")
     await this.chief.deployed()
 
     expect(await this.chief.devaddr()).to.equal(this.dev.address)
@@ -88,7 +88,7 @@ describe("ReactMaster", function () {
 
     it("should allow emergency withdraw", async function () {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
-      this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "100", "100", "1000")
+      this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "100", "100", "1000")
       await this.chief.deployed()
 
       await this.chief.add("100", this.lp.address, true)
@@ -107,7 +107,7 @@ describe("ReactMaster", function () {
     it("should give out REACTs only after farming time", async function () {
       const currentBlock = await ethers.provider.getBlockNumber()
       // 100 per block farming rate starting at block 100 with bonus until block 1000
-      this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 100, currentBlock + 1000)
+      this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 100, currentBlock + 1000)
       await this.chief.deployed()
       // await this.chief.set(0, 0, true)
       this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
@@ -136,7 +136,7 @@ describe("ReactMaster", function () {
     it("should not distribute REACTs if no one deposit", async function () {
       const currentBlock = await ethers.provider.getBlockNumber()
       // 100 per block farming rate starting at block 200 with bonus until block 1000
-      this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 200, currentBlock + 1000)
+      this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 200, currentBlock + 1000)
       await this.chief.deployed()
       this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
       await this.chief.add("100", this.lp.address, true)
@@ -162,7 +162,7 @@ describe("ReactMaster", function () {
     it("should distribute REACTs properly for each staker", async function () {
       const currentBlock = await ethers.provider.getBlockNumber()
       // 100 per block farming rate starting at block 300 with bonus until block 1000
-      this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 300, currentBlock + 1000)
+      this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 300, currentBlock + 1000)
       await this.chief.deployed()
       this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
       await this.chief.add("100", this.lp.address, true)
@@ -186,7 +186,7 @@ describe("ReactMaster", function () {
       await this.chief.connect(this.carol).deposit(1, "30", { from: this.carol.address })
       // Alice deposits 10 more LPs at block 320. At this point:
       //   Alice should have: 4*1000 + 4*1/3*1000 + 2*1/6*1000 = 5666
-      //   ReactMaster should have the remaining: 10000 - 5666 = 4334
+      //   ReactFarm should have the remaining: 10000 - 5666 = 4334
       await advanceBlockTo(currentBlock + 319)
       await this.chief.connect(this.alice).deposit(1, "10", { from: this.alice.address })
       expect(await this.react.totalSupply()).to.equal("11000")
@@ -231,7 +231,7 @@ describe("ReactMaster", function () {
     it("should give proper REACTs allocation to each pool", async function () {
       const currentBlock = await ethers.provider.getBlockNumber()
       // 100 per block farming rate starting at block 400 with bonus until block 1000
-      this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 400, currentBlock + 1000)
+      this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 400, currentBlock + 1000)
       this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
       await this.lp.connect(this.alice).approve(this.chief.address, "100000", { from: this.alice.address })
       await this.lp2.connect(this.bob).approve(this.chief.address, "100000", { from: this.bob.address })
@@ -259,7 +259,7 @@ describe("ReactMaster", function () {
     it("should stop giving bonus REACTs after the bonus period ends", async function () {
       const currentBlock = await ethers.provider.getBlockNumber()
       // 100 per block farming rate starting at block 500 with bonus until block 600
-      this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 500, currentBlock + 600)
+      this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "100", currentBlock + 500, currentBlock + 600)
       this.react.grantRole(ethers.utils.id('MINTER_ROLE'), this.chief.address)
       // await this.react.transferOwnership(this.chief.address)
       await this.lp.connect(this.alice).approve(this.chief.address, "1000", { from: this.alice.address })

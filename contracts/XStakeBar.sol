@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 // This contract handles swapping to and from xReact, ReactSwap's staking token.
 contract XStakeBar is ERC20("X-Stake Bar", "xREACT") {
     using SafeMath for uint256;
+
     IERC20 public react;
 
     // Define the React token contract

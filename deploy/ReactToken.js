@@ -1,31 +1,41 @@
-const { ethers, upgrades } = require('hardhat')
+const {ethers, upgrades} = require('hardhat')
 
- module.exports = async function ({ /*getNamedAccounts, */deployments }) {
-  const { /*deploy, */save/*, get*/ } = deployments
+module.exports = async function ({ /*getNamedAccounts, */deployments}) {
+    const { /*deploy, */save, get} = deployments
 
-  // const { deployer } = await getNamedAccounts()
+    try {
+        const deplpoyment = await get('ReactToken')
+        console.log(
+            `ReactToken already deployed to ${hre.network.name} at ${deplpoyment.address}`
+        )
+        return
+    } catch (e) {
+        // not deployed yet
+    }
 
-   const ReactToken = await ethers.getContractFactory('ReactToken')
-   const react = await upgrades.deployProxy(ReactToken, {
-     kind: 'uups',
-   })
+    // const { deployer } = await getNamedAccounts()
 
-   await react.deployed()
 
-   const artifact = await hre.artifacts.readArtifact('ReactToken')
+    const ReactToken = await ethers.getContractFactory('ReactToken')
+    const react = await upgrades.deployProxy(ReactToken, {
+        kind: 'uups',
+    })
 
-   await save('ReactToken', {
-     address: react.address,
-     abi: artifact.abi,
-   })
+    await react.deployed()
 
-   let receipt = await react.deployTransaction.wait()
-   console.log(
-       `ReactToken proxy deployed at: ${react.address} (block: ${
-           receipt.blockNumber
-       }) with ${receipt.gasUsed.toNumber()} gas`
-   )
+    const artifact = await hre.artifacts.readArtifact('ReactToken')
+
+    await save('ReactToken', {
+        address: react.address,
+        abi: artifact.abi,
+    })
+
+    let receipt = await react.deployTransaction.wait()
+    console.log(
+        `ReactToken proxy deployed at: ${react.address} (block: ${
+            receipt.blockNumber
+        }) with ${receipt.gasUsed.toNumber()} gas`
+    )
 }
 
 module.exports.tags = ["ReactToken"]
-module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02"]

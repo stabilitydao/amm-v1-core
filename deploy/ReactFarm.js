@@ -6,7 +6,7 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   const react = await ethers.getContract("ReactToken")
   const syrup = await ethers.getContract("XStakeBar")
 
-  const { address } = await deploy("ReactMaster", {
+  const { address } = await deploy("ReactFarm", {
     from: deployer,
     args: [react.address, syrup.address, dev, "1000000000000000000000", "0", "1000000000000000000000"],
     log: true,
@@ -16,7 +16,7 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
   const MINTER_ROLE = ethers.utils.id('MINTER_ROLE')
   let tx = await react.grantRole(MINTER_ROLE, address)
   process.stdout.write(
-      `Grant ReactToken MINTER_ROLE to ReactMaster (tx: ${tx.hash})...: `
+      `Grant ReactToken MINTER_ROLE to ReactFarm (tx: ${tx.hash})...: `
   )
 
   let receipt = await tx.wait()
@@ -30,13 +30,13 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     console.log(`REVERTED!`)
   }
 
-  const reactMaster = await ethers.getContract("ReactMaster")
+  const reactMaster = await ethers.getContract("ReactFarm")
   if (await reactMaster.owner() !== dev) {
-    // Transfer ownership of ReactMaster to dev
-    console.log("Transfer ownership of ReactMaster to dev")
+    // Transfer ownership of ReactFarm to dev
+    console.log("Transfer ownership of ReactFarm to dev")
     await (await reactMaster.transferOwnership(dev)).wait()
   }
 }
 
-module.exports.tags = ["ReactMaster"]
-module.exports.dependencies = ["Factory", "Router", "ReactToken", "XStakeBar"]
+module.exports.tags = ["ReactFarm"]
+module.exports.dependencies = ["ReactSwapFactory", "Router", "ReactToken", "XStakeBar"]

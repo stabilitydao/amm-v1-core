@@ -8,7 +8,7 @@ module.exports = async function ({
 
   const { deployer, dev } = await getNamedAccounts();
 
-  await deploy("Factory", {
+  await deploy("ReactSwapFactory", {
 /*    contract: {
       abi,
       bytecode,
@@ -20,4 +20,4 @@ module.exports = async function ({
   });
 };
 
-module.exports.tags = ["Factory", "AMM"];
+module.exports.tags = ["ReactSwapFactory", "AMM"];

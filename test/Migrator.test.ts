@@ -10,13 +10,13 @@ describe("Migrator", function () {
     this.dev = this.signers[2]
     this.minter = this.signers[3]
 
-    this.UniswapV2Factory = await ethers.getContractFactory("Factory")
+    this.UniswapV2Factory = await ethers.getContractFactory("ReactSwapFactory")
     this.UniswapV2Pair = await ethers.getContractFactory("Pair")
     this.ERC20Mock = await ethers.getContractFactory("ERC20Mock", this.minter)
     this.ReactToken = (await ethers.getContractFactory('ReactToken')) as ReactToken__factory
     this.ReactSyrup = (await ethers.getContractFactory("ReactSyrup")) as ReactSyrup__factory
 
-    this.ReactMaster = await ethers.getContractFactory("ReactMaster")
+    this.ReactFarm = await ethers.getContractFactory("ReactFarm")
     this.Migrator = await ethers.getContractFactory("Migrator")
   })
 
@@ -49,7 +49,7 @@ describe("Migrator", function () {
 
     this.lp2 = await this.UniswapV2Pair.attach((await pair2.wait()).events[0].args.pair)
 
-    this.chief = await this.ReactMaster.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "100000")
+    this.chief = await this.ReactFarm.deploy(this.react.address, this.syrup.address, this.dev.address, "1000", "0", "100000")
     await this.chief.deployed()
 
     this.migrator = await this.Migrator.deploy(this.chief.address, this.factory1.address, this.factory2.address, "0")

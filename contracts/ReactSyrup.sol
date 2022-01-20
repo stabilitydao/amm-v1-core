@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ReactSyrup is ERC20, Ownable {
     using SafeMath for uint256;
 
-    // The REACT TOKEN!
     IERC20 public react;
 
     constructor(

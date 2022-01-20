@@ -4,7 +4,7 @@ pragma solidity ^0.8.2;
 
 import "./libraries/SafeMath.sol";
 
-contract LP {
+contract RLP {
     using SafeMathUniswap for uint256;
 
     string public constant name = "ReactSwap Liquidity Provider";

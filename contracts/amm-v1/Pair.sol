@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.2;
 
-import "./LP.sol";
+import "./RLP.sol";
 import "./libraries/Math.sol";
 import "./libraries/UQ112x112.sol";
 import "./interfaces/IERC20.sol";
@@ -14,7 +14,7 @@ interface IMigrator {
     function desiredLiquidity() external view returns (uint256);
 }
 
-contract Pair is LP {
+contract Pair is RLP {
     using SafeMathUniswap for uint256;
     using UQ112x112 for uint224;
 

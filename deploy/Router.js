@@ -17,7 +17,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     throw Error("No WETH!");
   }
 
-  const factoryAddress = (await deployments.get("Factory")).address;
+  const factoryAddress = (await deployments.get("ReactSwapFactory")).address;
 
   await deploy("Router", {
     from: deployer,
@@ -28,4 +28,4 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 };
 
 module.exports.tags = ["Router", "AMM"];
-module.exports.dependencies = ["Factory", "Mocks"];
+module.exports.dependencies = ["ReactSwapFactory", "Mocks"];

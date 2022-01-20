@@ -9,10 +9,10 @@ import "./amm-v1/interfaces/IUniswapV2ERC20.sol";
 import "./amm-v1/interfaces/IUniswapV2Pair.sol";
 import "./amm-v1/interfaces/IUniswapV2Factory.sol";
 
-// XSwapFees contract handles "serving up" rewards for xReact holders by trading tokens collected from fees for React.
+// XBarman handles "serving up" rewards for xReact holders by trading tokens collected from fees for React.
 
 // T1 - T4: OK
-contract XSwapFees is Ownable {
+contract XBarman is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 

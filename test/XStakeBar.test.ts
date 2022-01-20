@@ -3,7 +3,7 @@ import { ethers, upgrades  } from "hardhat";
 import { expect } from "chai";
 import {ReactToken, ReactToken__factory} from "../types";
 
-describe("ReactBar", function () {
+describe("XStakeBar", function () {
   before(async function () {
     this.ReactToken = (await ethers.getContractFactory(
         'ReactToken'

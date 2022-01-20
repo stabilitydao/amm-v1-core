@@ -14,4 +14,4 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 }
 
 module.exports.tags = ["XStakeBar"]
-module.exports.dependencies = ["Factory", "Router", "ReactToken"]
+module.exports.dependencies = ["ReactSwapFactory", "Router", "ReactToken"]

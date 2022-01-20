@@ -33,4 +33,4 @@ module.exports = async function ({ getNamedAccounts, getChainId, deployments }) 
 }
 
 module.exports.tags = ["Roll"]
-module.exports.dependencies = ["Factory", "Router"]
+module.exports.dependencies = ["ReactSwapFactory", "Router"]

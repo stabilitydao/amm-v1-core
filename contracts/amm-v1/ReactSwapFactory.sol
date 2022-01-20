@@ -5,7 +5,7 @@ pragma solidity ^0.8.2;
 import "./interfaces/IUniswapV2Factory.sol";
 import "./Pair.sol";
 
-contract Factory is IUniswapV2Factory {
+contract ReactSwapFactory is IUniswapV2Factory {
     address public override feeTo;
     address public override feeToSetter;
     address public override migrator;
