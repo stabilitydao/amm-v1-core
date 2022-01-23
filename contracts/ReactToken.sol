@@ -8,17 +8,17 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20Pe
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20FlashMintUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 
 contract ReactToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, AccessControlUpgradeable, ERC20PermitUpgradeable, ERC20FlashMintUpgradeable, UUPSUpgradeable {
-    using Address for address;
+    using AddressUpgradeable for address;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TAX_CHANGER_ROLE = keccak256("TAX_CHANGER_ROLE");
     bytes32 public constant WHITELIST_OPERATOR_ROLE = keccak256("WHITELIST_OPERATOR_ROLE");
-    bool internal feeStartOperation = false;
+    bool internal feeStartOperation;
     address public feeAddress;
     uint256 public feeBuy; // For 1% _value=100
     uint256 public feeSale; // For 1% _value=100
@@ -27,10 +27,8 @@ contract ReactToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable
     mapping(address => bool) private whiteList;
     mapping(uint256 => uint256) private _feeBalances;
 
-    constructor() initializer
-    {
-        initialize();
-    }
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
 
     function initialize() initializer public {
         __ERC20_init("ReactSwap", "REACT");
