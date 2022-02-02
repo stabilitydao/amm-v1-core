@@ -2,15 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x2280EC541a667bC94F86ca18e6F7179D56b058A6",
-      "txHash": "0x17a852d29fef9ef61da14d7529eb029bd72d0613e8fdaa58cf70a0fb02a1a45f",
+      "address": "0x2925293d027391eD3CC24bf4a4B80D072FCBB714",
+      "txHash": "0x993e73161e8764fb1db92da5931a1d70f949e70e8914993977b59860fa534b72",
       "kind": "uups"
     }
   ],
   "impls": {
-    "2b766594aeaeac1d05a5ff7112a19ba92514607799a33e4604708c9aedf60c09": {
-      "address": "0x0007397cf51D5Bdcd409045C2A3BF683E6e325ef",
-      "txHash": "0x870655a02c10412effed37f3d5410190cebaa82bc1c51f0d1a18ca7a197c4418",
+    "d935ea8338737938bf87b602d54b6c9df4fa4662bbe835ea442fdbc8ab3b4484": {
+      "address": "0x6dF6f7B399A1BE314450Fe4466F5d753fc87186A",
+      "txHash": "0x7798316690e81f4ceccfe4c6e2b9aa064fa19a7fc48bf63e66fa382f0b2fbfb9",
       "layout": {
         "storage": [
           {
@@ -144,20 +144,71 @@
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
             "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:81"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "feeStartOperation",
+            "type": "t_bool",
+            "src": "contracts/ReactToken.sol:21"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "feeAddress",
+            "type": "t_address",
+            "src": "contracts/ReactToken.sol:22"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "feeBuy",
+            "type": "t_uint256",
+            "src": "contracts/ReactToken.sol:23"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "feeSale",
+            "type": "t_uint256",
+            "src": "contracts/ReactToken.sol:24"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "swapList",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "contracts/ReactToken.sol:26"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "whiteList",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "contracts/ReactToken.sol:27"
+          },
+          {
+            "contract": "ReactToken",
+            "label": "_feeBalances",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "contracts/ReactToken.sol:28"
           }
         ],
         "types": {
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]"
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_address": {
+            "label": "address"
           },
           "t_uint256": {
             "label": "uint256"
           },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
           "t_mapping(t_address,t_struct(Counter)2546_storage)": {
             "label": "mapping(address => struct CountersUpgradeable.Counter)"
-          },
-          "t_address": {
-            "label": "address"
           },
           "t_struct(Counter)2546_storage": {
             "label": "struct CountersUpgradeable.Counter",
@@ -189,12 +240,6 @@
                 "type": "t_bytes32"
               }
             ]
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)"
-          },
-          "t_bool": {
-            "label": "bool"
           },
           "t_mapping(t_address,t_uint256)": {
             "label": "mapping(address => uint256)"

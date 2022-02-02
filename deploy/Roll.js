@@ -8,7 +8,17 @@ UNISWAP_ROUTER.set("1287", "0x2823caf546C7d09a4832bd1da14f2C6b6E665e05")
 UNISWAP_ROUTER.set("79377087078960", "0x0B72c0193CD598b536210299d358A5b720A262b8")
 
 module.exports = async function ({ getNamedAccounts, getChainId, deployments }) {
-  const { deploy } = deployments
+  const { deploy, get } = deployments
+
+  try {
+    const deployment = await get('Roll')
+    console.log(
+        `Roll already deployed to ${hre.network.name} at ${deployment.address}`
+    )
+    return
+  } catch (e) {
+    // not deployed yet
+  }
 
   const { deployer } = await getNamedAccounts()
 

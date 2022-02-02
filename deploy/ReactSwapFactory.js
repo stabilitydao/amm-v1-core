@@ -4,7 +4,17 @@ module.exports = async function ({
   deployments,
   getChainId,
 }) {
-  const { deploy } = deployments;
+  const { deploy, get } = deployments;
+
+  try {
+    const deployment = await get('ReactSwapFactory')
+    console.log(
+        `ReactSwapFactory already deployed to ${hre.network.name} at ${deployment.address}`
+    )
+    return
+  } catch (e) {
+    // not deployed yet
+  }
 
   const { deployer, dev } = await getNamedAccounts();
 

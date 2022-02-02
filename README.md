@@ -19,6 +19,7 @@ Changes from SushiSwap contracts:
   * ReactVault (CakeVault)
   * PoolFactory (SmartChefFactory)
   * ReactPool (SmartChefInitializable)
+  * ReactProfile (PancakeProfile)
 * Stack upgrade 
   * Solidity 0.8
   * OpenZeppelin 4.4
@@ -35,9 +36,10 @@ AMM pair init code hash `edeccb88a4d2c30e6406944e3b3b22b0806f5aca2fa7edfd90e916b
 | ReactSwapFactory  | 0xff6dca94678a420190aAee00485c5F2d1B6bae7e |
 | Router  | 0x07A7d038EB2DC9aCCeeFBDf28cBef21Df68b1616 |
 | Roll  | 0xD46a4Ea343d8aDe7503E1b95772c0365fE97e403 |
-| XStakeBar  | 0x43A6d1ba67264be41628D4ca6a493946ad11A246 |
-| XBarman  | 0xe2d76aF9338a2b129b9aD28e1E1265E98DED6722 |
-| ReactSyrup  | 0x5b1295Cf4f69FDA49A830Bc6D467b58c97535893 |
-| ReactFarm  | 0x04A19E4e546A6606E28419cf21B98dD724fbF8Ea |
-| ReactVault  | 0x1cE263b6cc448E7c356f29a253602a5E0395FcBd |
+| ReactSyrup  | 0x74ce4292557bC5e7a86749F84117EAe8706C3D85 |
+| ReactFarm  | 0x3EC9060E52b9B435Db7fDeC55CA33B8bcBaF2D2b |
+| ReactProfile  | 0xe10Ec5809683239F00916Cc5770a98817dE8Be0E |
+| ReactVault  | 0xD27fee7E1174f50fb63fb325af0475576ef8bD24 |
 | PoolFactory  | 0xaf19a89ff976f2ee54571dfcb43c478e4007fb87 |
+| XStakeBar  | 0x02208063DD630C4aeAFf090e31F60785790A7328 |
+| XBarman  | 0xD6311dFa6859D9C5D63a281Ba3b2dFC45768Dccb |
