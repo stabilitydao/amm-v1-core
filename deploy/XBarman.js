@@ -1,7 +1,17 @@
 const { WETH } = require("@sushiswap/sdk")
 
 module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts, deployments }) {
-  const { deploy } = deployments
+  const { deploy, get } = deployments;
+
+  try {
+    const deployment = await get('XBarman')
+    console.log(
+        `XBarman already deployed to ${hre.network.name} at ${deployment.address}`
+    )
+    return
+  } catch (e) {
+    // not deployed yet
+  }
 
   const { deployer, dev } = await getNamedAccounts()
 
@@ -36,4 +46,4 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
 }
 
 module.exports.tags = ["XBarman"]
-module.exports.dependencies = ["ReactSwapFactory", "Router", "XStakeBar", "ReactToken"]
+module.exports.dependencies = ["ReactSwapFactory", "XStakeBar", "ReactToken"]

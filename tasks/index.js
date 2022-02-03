@@ -182,6 +182,7 @@ task("router:add-liquidity", "Router add liquidity")
 .addOptionalParam("deadline", MaxUint256)
 .setAction(async function ({ tokenA, tokenB, tokenADesired, tokenBDesired, tokenAMinimum, tokenBMinimum, to, deadline }, { ethers: { getNamedSigner } }, runSuper) {
   const router = await ethers.getContract("Router")
+  deadline = MaxUint256
   await run("erc20:approve", { token: tokenA, spender: router.address })
   await run("erc20:approve", { token: tokenB, spender: router.address })
   await (await router.connect(await getNamedSigner("dev")).addLiquidity(tokenA, tokenB, tokenADesired, tokenBDesired, tokenAMinimum, tokenBMinimum, to, deadline)).wait()    

@@ -1,5 +1,15 @@
 module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
-  const { deploy } = deployments
+  const { deploy, get } = deployments;
+
+  try {
+    const deployment = await get('ReactFarm')
+    console.log(
+        `ReactFarm already deployed to ${hre.network.name} at ${deployment.address}`
+    )
+    return
+  } catch (e) {
+    // not deployed yet
+  }
 
   const { deployer, dev } = await getNamedAccounts()
 

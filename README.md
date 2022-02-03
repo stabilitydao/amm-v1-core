@@ -26,7 +26,7 @@ Changes from SushiSwap contracts:
 
 ## Deployments
 
-AMM pair init code hash `edeccb88a4d2c30e6406944e3b3b22b0806f5aca2fa7edfd90e916bb34c10d43`
+AMM pair init code hash `cb54e91f48528688ead76d80df1d5639f715890a9d260928f22572e311dcfc26`
 
 ### Ropsten testnet
 
@@ -34,8 +34,8 @@ AMM pair init code hash `edeccb88a4d2c30e6406944e3b3b22b0806f5aca2fa7edfd90e916b
 |-------------------|--------------------------------------------|
 | ReactToken        | 0x2280EC541a667bC94F86ca18e6F7179D56b058A6 |
 | ReactSwapFactory  | 0xff6dca94678a420190aAee00485c5F2d1B6bae7e |
-| Router  | 0x07A7d038EB2DC9aCCeeFBDf28cBef21Df68b1616 |
-| Roll  | 0xD46a4Ea343d8aDe7503E1b95772c0365fE97e403 |
+| Router  | 0xE30184E3957E6f02d2C57ee4AFBe9A789222E586 |
+| Roll  | 0xa17787D5B5D5720048a808B6DE30272257E9d2F7 |
 | ReactSyrup  | 0x74ce4292557bC5e7a86749F84117EAe8706C3D85 |
 | ReactFarm  | 0x3EC9060E52b9B435Db7fDeC55CA33B8bcBaF2D2b |
 | ReactProfile  | 0xe10Ec5809683239F00916Cc5770a98817dE8Be0E |
