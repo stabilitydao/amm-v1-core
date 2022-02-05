@@ -32,7 +32,7 @@ AMM pair init code hash `cb54e91f48528688ead76d80df1d5639f715890a9d260928f22572e
 
 | Contract          | Address                                    |
 |-------------------|--------------------------------------------|
-| ReactToken        | 0x2280EC541a667bC94F86ca18e6F7179D56b058A6 |
+| ReactToken        | 0x2925293d027391eD3CC24bf4a4B80D072FCBB714 |
 | ReactSwapFactory  | 0xff6dca94678a420190aAee00485c5F2d1B6bae7e |
 | Router  | 0xE30184E3957E6f02d2C57ee4AFBe9A789222E586 |
 | Roll  | 0xa17787D5B5D5720048a808B6DE30272257E9d2F7 |
